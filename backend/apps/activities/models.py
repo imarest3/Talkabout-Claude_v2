@@ -1,6 +1,6 @@
 import uuid
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now as timezone_now
 from apps.users.models import User
 
 
@@ -19,7 +19,7 @@ class Activity(models.Model):
         limit_choices_to={'role__in': [User.Role.TEACHER, User.Role.ADMIN]}
     )
     is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone_now)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -43,7 +43,7 @@ class ActivityFile(models.Model):
     )
     file = models.FileField(upload_to='activity_files/%Y/%m/%d/')
     filename = models.CharField(max_length=255)
-    uploaded_at = models.DateTimeField(default=timezone.now)
+    uploaded_at = models.DateTimeField(default=timezone_now)
 
     class Meta:
         db_table = 'activity_files'

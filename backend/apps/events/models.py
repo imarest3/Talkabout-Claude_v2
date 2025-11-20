@@ -1,7 +1,7 @@
 import uuid
 import secrets
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now as timezone_now
 from apps.activities.models import Activity
 from apps.users.models import User
 
@@ -47,7 +47,7 @@ class Event(models.Model):
         default=Status.SCHEDULED,
         db_index=True
     )
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone_now)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -94,7 +94,7 @@ class Enrollment(models.Model):
         on_delete=models.CASCADE,
         related_name='enrollments'
     )
-    enrolled_at = models.DateTimeField(default=timezone.now)
+    enrolled_at = models.DateTimeField(default=timezone_now)
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
