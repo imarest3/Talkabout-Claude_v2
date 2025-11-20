@@ -1,7 +1,7 @@
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now as timezone_now
 
 
 class UserManager(BaseUserManager):
@@ -55,7 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_anonymized = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone_now)
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = UserManager()

@@ -1,6 +1,6 @@
 import uuid
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now as timezone_now
 from apps.events.models import Event
 from apps.users.models import User
 
@@ -31,7 +31,7 @@ class Meeting(models.Model):
     )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone_now)
 
     class Meta:
         db_table = 'meetings'
@@ -71,7 +71,7 @@ class MeetingParticipant(models.Model):
         on_delete=models.CASCADE,
         related_name='meeting_participations'
     )
-    joined_at = models.DateTimeField(default=timezone.now)
+    joined_at = models.DateTimeField(default=timezone_now)
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
