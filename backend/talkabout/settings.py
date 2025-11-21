@@ -75,16 +75,29 @@ WSGI_APPLICATION = 'talkabout.wsgi.application'
 ASGI_APPLICATION = 'talkabout.asgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'talkabout_db'),
-        'USER': os.getenv('POSTGRES_USER', 'talkabout_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'talkabout_password'),
-        'HOST': os.getenv('POSTGRES_HOST', 'db'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+postgres_db = os.getenv('POSTGRES_DB')
+
+# Use PostgreSQL only when explicit credentials are provided. This avoids connection
+# errors during local development where no database service is available and keeps a
+# functional SQLite fallback for running migrations and tests.
+if postgres_db:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': postgres_db,
+            'USER': os.getenv('POSTGRES_USER', 'talkabout_user'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'talkabout_password'),
+            'HOST': os.getenv('POSTGRES_HOST', 'db'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
