@@ -269,6 +269,27 @@ docker-compose exec backend python manage.py test
 docker-compose exec frontend npm test
 ```
 
+## Documentación de API
+
+La documentación completa de la API REST está disponible en [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md).
+
+### Endpoints Disponibles (Fase 2)
+
+**Autenticación:**
+- `POST /api/users/auth/register/` - Registro normal
+- `POST /api/users/auth/register/edx/` - Registro desde edX
+- `POST /api/users/auth/login/` - Login
+- `POST /api/users/auth/logout/` - Logout
+- `POST /api/users/auth/token/refresh/` - Refresh token
+
+**Perfil de Usuario:**
+- `GET /api/users/profile/` - Ver perfil
+- `PUT/PATCH /api/users/profile/update/` - Actualizar perfil
+- `POST /api/users/profile/change-password/` - Cambiar contraseña
+- `POST /api/users/profile/anonymize/` - Anonimizar usuario
+
+Ver [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) para ejemplos de uso, request/response formats, y códigos de error.
+
 ## Plan de Desarrollo Incremental
 
 ### ✅ Fase 1: Fundamentos (COMPLETADA)
@@ -277,10 +298,18 @@ docker-compose exec frontend npm test
 - Modelos de base de datos
 - Configuración Django + React
 
-### Fase 2: Sistema de Autenticación
-- Login/registro
-- Gestión de roles
-- JWT tokens
+### ✅ Fase 2: Sistema de Autenticación (COMPLETADA)
+- Serializers para User (registro, login, perfil)
+- Registro normal (genera user_code único)
+- Registro desde edX (usa USER_ID con hash SHA-1)
+- Login con JWT (access + refresh tokens)
+- Logout con blacklist de tokens
+- Ver y actualizar perfil de usuario
+- Cambiar contraseña
+- Anonimización de usuarios (GDPR)
+- Sistema de permisos por roles (Admin, Profesor, Estudiante)
+- Tests de autenticación
+- Documentación completa de API (ver `API_DOCUMENTATION.md`)
 
 ### Fase 3: CRUD de Actividades
 - Crear/editar actividades
