@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'channels',
     'django_extensions',
+    'django_filters',
 
     # Local apps
     'apps.users',

@@ -382,10 +382,262 @@ Import the endpoints and configure:
 
 ---
 
+## Activities Management Endpoints
+
+### 10. List Activities
+
+Get a list of all activities with filtering and search capabilities.
+
+**Endpoint:** `GET /api/activities/`
+
+**Authentication:** Required
+
+**Query Parameters:**
+- `search` - Search in code, title, or description
+- `is_active` - Filter by active status (`true` or `false`)
+- `created_by` - Filter by creator user ID
+- `ordering` - Sort by field (e.g., `-created_at`, `title`, `code`)
+
+**Visibility Rules:**
+- **Students**: Only see active activities
+- **Teachers**: See their own activities + active ones
+- **Admins**: See all activities
+
+**Response (200 OK):**
+```json
+{
+  "count": 2,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": "uuid-here",
+      "code": "ACT001",
+      "title": "Conversation Practice",
+      "description": "<p>Practice speaking English</p>",
+      "max_participants_per_meeting": 6,
+      "created_by": "uuid-teacher",
+      "created_by_name": "teacher_001",
+      "is_active": true,
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T10:30:00Z",
+      "files": [
+        {
+          "id": "uuid-file",
+          "filename": "Instructions.pdf",
+          "file": "/media/activity_files/2024/01/15/instructions.pdf",
+          "file_url": "http://localhost:8000/media/activity_files/2024/01/15/instructions.pdf",
+          "uploaded_at": "2024-01-15T10:35:00Z"
+        }
+      ],
+      "event_count": 5
+    }
+  ]
+}
+```
+
+---
+
+### 11. Create Activity
+
+Create a new activity. Only teachers and admins can create activities.
+
+**Endpoint:** `POST /api/activities/create/`
+
+**Authentication:** Required (Teacher or Admin only)
+
+**Request Body:**
+```json
+{
+  "code": "ACT002",
+  "title": "Group Discussion",
+  "description": "<p>Discussion activity about technology</p>",
+  "max_participants_per_meeting": 8,
+  "is_active": true
+}
+```
+
+**Validation:**
+- `code` must be unique
+- `max_participants_per_meeting` must be at least 2
+- `created_by` is automatically set to current user
+
+**Response (201 Created):**
+```json
+{
+  "code": "ACT002",
+  "title": "Group Discussion",
+  "description": "<p>Discussion activity about technology</p>",
+  "max_participants_per_meeting": 8,
+  "is_active": true
+}
+```
+
+---
+
+### 12. Get Activity Details
+
+Get detailed information about a specific activity.
+
+**Endpoint:** `GET /api/activities/<code>/`
+
+**Authentication:** Required
+
+**Response (200 OK):**
+```json
+{
+  "id": "uuid-here",
+  "code": "ACT001",
+  "title": "Conversation Practice",
+  "description": "<p>Practice speaking English</p>",
+  "max_participants_per_meeting": 6,
+  "created_by": "uuid-teacher",
+  "created_by_name": "teacher_001",
+  "is_active": true,
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z",
+  "files": [],
+  "event_count": 5
+}
+```
+
+---
+
+### 13. Update Activity
+
+Update an existing activity. Only the creator or admins can update.
+
+**Endpoint:** `PUT /api/activities/<code>/update/` or `PATCH /api/activities/<code>/update/`
+
+**Authentication:** Required (Creator or Admin only)
+
+**Request Body:**
+```json
+{
+  "title": "Updated Title",
+  "description": "<p>Updated description</p>",
+  "max_participants_per_meeting": 10,
+  "is_active": true,
+  "code": "ACT001"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "code": "ACT001",
+  "title": "Updated Title",
+  "description": "<p>Updated description</p>",
+  "max_participants_per_meeting": 10,
+  "is_active": true
+}
+```
+
+---
+
+### 14. Delete Activity
+
+Delete an activity. Only the creator or admins can delete.
+
+**Endpoint:** `DELETE /api/activities/<code>/delete/`
+
+**Authentication:** Required (Creator or Admin only)
+
+**Behavior:**
+- If activity has events: **Soft delete** (marks as inactive)
+- If activity has no events: **Hard delete** (removes from database)
+
+**Response (200 OK - Soft Delete):**
+```json
+{
+  "message": "Activity marked as inactive (has associated events)"
+}
+```
+
+**Response (204 No Content - Hard Delete):**
+```json
+{
+  "message": "Activity deleted successfully"
+}
+```
+
+---
+
+### 15. Upload File to Activity
+
+Upload a file attachment to an activity.
+
+**Endpoint:** `POST /api/activities/<code>/files/upload/`
+
+**Authentication:** Required (Creator or Admin only)
+
+**Request Body (multipart/form-data):**
+```
+file: <binary file data>
+filename: "Instructions Document"
+```
+
+**File Validation:**
+- Maximum file size: 10MB
+- `filename` is optional (auto-filled from file if not provided)
+
+**Response (201 Created):**
+```json
+{
+  "id": "uuid-file",
+  "filename": "Instructions Document",
+  "file": "/media/activity_files/2024/01/15/instructions.pdf",
+  "file_url": "http://localhost:8000/media/activity_files/2024/01/15/instructions.pdf",
+  "uploaded_at": "2024-01-15T10:35:00Z"
+}
+```
+
+---
+
+### 16. Delete File from Activity
+
+Delete a file attachment from an activity.
+
+**Endpoint:** `DELETE /api/activities/<code>/files/<file_id>/delete/`
+
+**Authentication:** Required (Creator or Admin only)
+
+**Response (204 No Content):**
+```json
+{
+  "message": "File deleted successfully"
+}
+```
+
+---
+
+### 17. Get Activity Statistics
+
+Get statistics for an activity (event count, enrollments, attendance).
+
+**Endpoint:** `GET /api/activities/<code>/statistics/`
+
+**Authentication:** Required
+
+**Response (200 OK):**
+```json
+{
+  "activity_code": "ACT001",
+  "activity_title": "Conversation Practice",
+  "total_events": 10,
+  "active_events": 3,
+  "completed_events": 7,
+  "total_enrollments": 45,
+  "currently_enrolled": 15,
+  "total_attended": 38,
+  "attendance_rate": 84.44
+}
+```
+
+---
+
 ## Next API Sections (Coming Soon)
 
-- Activities Management
 - Events Management
 - Enrollments
 - Meetings and Video Conferences
-- Statistics and Reporting

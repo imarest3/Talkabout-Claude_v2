@@ -273,20 +273,30 @@ docker-compose exec frontend npm test
 
 La documentación completa de la API REST está disponible en [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md).
 
-### Endpoints Disponibles (Fase 2)
+### Endpoints Disponibles
 
-**Autenticación:**
+**Autenticación (Fase 2):**
 - `POST /api/users/auth/register/` - Registro normal
 - `POST /api/users/auth/register/edx/` - Registro desde edX
 - `POST /api/users/auth/login/` - Login
 - `POST /api/users/auth/logout/` - Logout
 - `POST /api/users/auth/token/refresh/` - Refresh token
 
-**Perfil de Usuario:**
+**Perfil de Usuario (Fase 2):**
 - `GET /api/users/profile/` - Ver perfil
 - `PUT/PATCH /api/users/profile/update/` - Actualizar perfil
 - `POST /api/users/profile/change-password/` - Cambiar contraseña
 - `POST /api/users/profile/anonymize/` - Anonimizar usuario
+
+**Actividades (Fase 3):**
+- `GET /api/activities/` - Listar actividades (con filtros y búsqueda)
+- `POST /api/activities/create/` - Crear actividad
+- `GET /api/activities/<code>/` - Ver detalle de actividad
+- `PUT/PATCH /api/activities/<code>/update/` - Actualizar actividad
+- `DELETE /api/activities/<code>/delete/` - Eliminar actividad
+- `POST /api/activities/<code>/files/upload/` - Subir archivo
+- `DELETE /api/activities/<code>/files/<file_id>/delete/` - Eliminar archivo
+- `GET /api/activities/<code>/statistics/` - Estadísticas de actividad
 
 Ver [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) para ejemplos de uso, request/response formats, y códigos de error.
 
@@ -311,10 +321,16 @@ Ver [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) para ejemplos de uso, reque
 - Tests de autenticación
 - Documentación completa de API (ver `API_DOCUMENTATION.md`)
 
-### Fase 3: CRUD de Actividades
-- Crear/editar actividades
-- Subir archivos
-- Panel de administración
+### ✅ Fase 3: CRUD de Actividades (COMPLETADA)
+- Serializers para Activity y ActivityFile
+- CRUD completo de actividades (crear, listar, ver, actualizar, eliminar)
+- Subir y eliminar archivos adjuntos (max 10MB)
+- Filtros y búsqueda de actividades
+- Permisos por roles (solo profesores/admins pueden crear/editar)
+- Soft delete de actividades con eventos
+- Estadísticas de actividades (eventos, inscripciones, asistencia)
+- Tests completos
+- Documentación de API actualizada
 
 ### Fase 4: Gestión de Eventos
 - Crear eventos
