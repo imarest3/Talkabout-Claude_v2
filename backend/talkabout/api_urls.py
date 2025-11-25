@@ -10,7 +10,9 @@ urlpatterns = [
     # Activities
     path('activities/', include('apps.activities.urls')),
 
+    # Events
+    path('events/', include('apps.events.urls')),
+
     # App URLs (will be added in future phases)
-    # path('events/', include('apps.events.urls')),
     # path('meetings/', include('apps.meetings.urls')),
 ]
