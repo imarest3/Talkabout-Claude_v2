@@ -641,3 +641,390 @@ Get statistics for an activity (event count, enrollments, attendance).
 - Events Management
 - Enrollments
 - Meetings and Video Conferences
+
+## Events Management Endpoints
+
+### 18. List Events
+
+Get a list of all events with filtering capabilities.
+
+**Endpoint:** `GET /api/events/`
+
+**Authentication:** Required
+
+**Query Parameters:**
+- `activity_code` - Filter by activity code
+- `status` - Filter by event status (scheduled, in_waiting, in_progress, completed, cancelled)
+- `start_date` - Filter events starting from this date (ISO format)
+- `end_date` - Filter events up to this date (ISO format)
+- `search` - Search in activity code or title
+- `ordering` - Sort by field (e.g., `start_datetime`, `-created_at`)
+
+**Response (200 OK):**
+```json
+{
+  "count": 5,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": "uuid-here",
+      "activity": "uuid-activity",
+      "activity_code": "ACT001",
+      "activity_title": "Conversation Practice",
+      "start_datetime": "2024-02-01T09:00:00Z",
+      "end_datetime": "2024-02-01T10:00:00Z",
+      "waiting_time_minutes": 10,
+      "first_reminder_minutes": 1440,
+      "second_reminder_minutes": 60,
+      "first_reminder_sent": false,
+      "second_reminder_sent": false,
+      "waiting_email_sent": false,
+      "status": "scheduled",
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T10:30:00Z",
+      "enrolled_count": 12,
+      "attended_count": 0
+    }
+  ]
+}
+```
+
+---
+
+### 19. Create Event
+
+Create a single event for an activity.
+
+**Endpoint:** `POST /api/events/create/`
+
+**Authentication:** Required (Teacher or Admin only)
+
+**Request Body:**
+```json
+{
+  "activity_code": "ACT001",
+  "start_datetime": "2024-02-01T09:00:00Z",
+  "end_datetime": "2024-02-01T10:00:00Z",
+  "waiting_time_minutes": 10,
+  "first_reminder_minutes": 1440,
+  "second_reminder_minutes": 60
+}
+```
+
+**Validation:**
+- `start_datetime` must be in the future
+- `end_datetime` must be after `start_datetime`
+- `first_reminder_minutes` must be greater than `second_reminder_minutes`
+
+**Response (201 Created):**
+```json
+{
+  "id": "uuid-here",
+  "activity": "uuid-activity",
+  "activity_code": "ACT001",
+  "activity_title": "Conversation Practice",
+  "start_datetime": "2024-02-01T09:00:00Z",
+  "end_datetime": "2024-02-01T10:00:00Z",
+  "waiting_time_minutes": 10,
+  "first_reminder_minutes": 1440,
+  "second_reminder_minutes": 60,
+  "status": "scheduled"
+}
+```
+
+---
+
+### 20. Bulk Create Events
+
+Create multiple events based on date range and time slots.
+
+**Endpoint:** `POST /api/events/bulk-create/`
+
+**Authentication:** Required (Teacher or Admin only)
+
+**Request Body:**
+```json
+{
+  "activity_code": "ACT001",
+  "start_date": "2024-02-01",
+  "end_date": "2024-02-07",
+  "hours_utc": ["09:00", "14:00", "18:00"],
+  "duration_minutes": 60,
+  "waiting_time_minutes": 10,
+  "first_reminder_minutes": 1440,
+  "second_reminder_minutes": 60
+}
+```
+
+**Description:**
+- Creates events for each day in the date range
+- For each day, creates events at specified hours (in UTC)
+- Skips events in the past
+
+**Response (201 Created):**
+```json
+{
+  "message": "Successfully created 21 events",
+  "events": [
+    {
+      "id": "uuid-1",
+      "activity_code": "ACT001",
+      "start_datetime": "2024-02-01T09:00:00Z",
+      "end_datetime": "2024-02-01T10:00:00Z"
+    },
+    ...
+  ]
+}
+```
+
+---
+
+### 21. Get Event Details
+
+Get detailed information about a specific event.
+
+**Endpoint:** `GET /api/events/<event_id>/`
+
+**Authentication:** Required
+
+**Response (200 OK):**
+```json
+{
+  "id": "uuid-here",
+  "activity": "uuid-activity",
+  "activity_code": "ACT001",
+  "activity_title": "Conversation Practice",
+  "start_datetime": "2024-02-01T09:00:00Z",
+  "end_datetime": "2024-02-01T10:00:00Z",
+  "waiting_time_minutes": 10,
+  "first_reminder_minutes": 1440,
+  "second_reminder_minutes": 60,
+  "status": "scheduled",
+  "enrolled_count": 12,
+  "attended_count": 0
+}
+```
+
+---
+
+### 22. Update Event
+
+Update an event. Cannot update events that have already started.
+
+**Endpoint:** `PUT /api/events/<event_id>/update/` or `PATCH /api/events/<event_id>/update/`
+
+**Authentication:** Required (Teacher or Admin only)
+
+**Request Body:**
+```json
+{
+  "start_datetime": "2024-02-01T10:00:00Z",
+  "end_datetime": "2024-02-01T11:00:00Z",
+  "waiting_time_minutes": 15
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "start_datetime": "2024-02-01T10:00:00Z",
+  "end_datetime": "2024-02-01T11:00:00Z",
+  "waiting_time_minutes": 15
+}
+```
+
+---
+
+### 23. Delete Event
+
+Delete an event. Cannot delete events with enrollments.
+
+**Endpoint:** `DELETE /api/events/<event_id>/delete/`
+
+**Authentication:** Required (Teacher or Admin only)
+
+**Response (204 No Content):**
+```json
+{
+  "message": "Event deleted successfully"
+}
+```
+
+**Error Response (400 Bad Request):**
+```json
+{
+  "error": "Cannot delete events with enrollments. Cancel the event instead."
+}
+```
+
+---
+
+### 24. Enroll in Event
+
+Enroll current user in an event.
+
+**Endpoint:** `POST /api/events/enroll/`
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "event_id": "uuid-here"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": "uuid-enrollment",
+  "user": "uuid-user",
+  "user_code": "student_001",
+  "event": "uuid-event",
+  "event_id": "uuid-event",
+  "event_start": "2024-02-01T09:00:00Z",
+  "event_end": "2024-02-01T10:00:00Z",
+  "activity_code": "ACT001",
+  "activity_title": "Conversation Practice",
+  "enrolled_at": "2024-01-20T15:30:00Z",
+  "status": "enrolled"
+}
+```
+
+---
+
+### 25. Unenroll from Event
+
+Unenroll current user from an event.
+
+**Endpoint:** `POST /api/events/<event_id>/unenroll/`
+
+**Authentication:** Required
+
+**Response (200 OK):**
+```json
+{
+  "message": "Successfully unenrolled from event"
+}
+```
+
+---
+
+### 26. My Enrollments
+
+Get current user's enrollments.
+
+**Endpoint:** `GET /api/events/my-enrollments/`
+
+**Authentication:** Required
+
+**Response (200 OK):**
+```json
+{
+  "count": 3,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": "uuid-enrollment",
+      "event_id": "uuid-event",
+      "event_start": "2024-02-01T09:00:00Z",
+      "event_end": "2024-02-01T10:00:00Z",
+      "activity_code": "ACT001",
+      "activity_title": "Conversation Practice",
+      "status": "enrolled",
+      "enrolled_at": "2024-01-20T15:30:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### 27. Get Event Enrollments
+
+Get all enrollments for a specific event (Teachers and Admins only).
+
+**Endpoint:** `GET /api/events/<event_id>/enrollments/`
+
+**Authentication:** Required (Teacher or Admin only)
+
+**Response (200 OK):**
+```json
+{
+  "count": 15,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": "uuid-enrollment",
+      "user_code": "student_001",
+      "status": "enrolled",
+      "enrolled_at": "2024-01-20T15:30:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### 28. Convert Timezone
+
+Convert a UTC datetime to a target timezone.
+
+**Endpoint:** `POST /api/events/convert-timezone/`
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "datetime_utc": "2024-02-01T14:00:00Z",
+  "target_timezone": "America/Mexico_City"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "datetime_utc": "2024-02-01T14:00:00+00:00",
+  "datetime_local": "2024-02-01T08:00:00-06:00",
+  "timezone": "America/Mexico_City",
+  "offset": "-0600"
+}
+```
+
+---
+
+### 29. Get Event Statistics
+
+Get statistics for a specific event.
+
+**Endpoint:** `GET /api/events/<event_id>/statistics/`
+
+**Authentication:** Required
+
+**Response (200 OK):**
+```json
+{
+  "event_id": "uuid-here",
+  "activity_code": "ACT001",
+  "activity_title": "Conversation Practice",
+  "start_datetime": "2024-02-01T09:00:00Z",
+  "end_datetime": "2024-02-01T10:00:00Z",
+  "status": "scheduled",
+  "total_enrolled": 15,
+  "total_cancelled": 2,
+  "total_attended": 0,
+  "total_no_show": 0,
+  "max_participants_per_meeting": 6,
+  "meetings_count": 0
+}
+```
+
+---
+
+## Next API Sections (Coming Soon)
+
+- Meetings and Video Conferences
