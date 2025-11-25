@@ -23,18 +23,30 @@ from apps.users.permissions import IsTeacherOrAdmin
 from apps.activities.models import Activity
 
 
-class EventListView(generics.ListAPIView):
+class EventListView(generics.ListCreateAPIView):
     """
-    List all events with filtering and search.
-    Available to all authenticated users.
+    List all events (GET) or create a single event (POST).
+    - GET: Available to all authenticated users.
+    - POST: Only teachers and admins can create events.
     """
-    serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'activity']
     search_fields = ['activity__code', 'activity__title']
     ordering_fields = ['start_datetime', 'created_at']
     ordering = ['start_datetime']
+
+    def get_serializer_class(self):
+        """Use different serializers for list and create."""
+        if self.request.method == 'POST':
+            return EventCreateSerializer
+        return EventSerializer
+
+    def get_permissions(self):
+        """Only teachers and admins can create events."""
+        if self.request.method == 'POST':
+            return [IsAuthenticated(), IsTeacherOrAdmin()]
+        return [IsAuthenticated()]
 
     def get_queryset(self):
         """Get events with enrollment counts."""
@@ -67,15 +79,6 @@ class EventListView(generics.ListAPIView):
                 pass
 
         return queryset
-
-
-class EventCreateView(generics.CreateAPIView):
-    """
-    Create a single event.
-    Only teachers and admins can create events.
-    """
-    serializer_class = EventCreateSerializer
-    permission_classes = [IsAuthenticated, IsTeacherOrAdmin]
 
 
 @api_view(['POST'])

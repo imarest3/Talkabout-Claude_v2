@@ -300,7 +300,7 @@ La documentación completa de la API REST está disponible en [`API_DOCUMENTATIO
 
 **Eventos (Fase 4):**
 - `GET /api/events/` - Listar eventos (con filtros)
-- `POST /api/events/create/` - Crear evento individual
+- `POST /api/events/` - Crear evento individual
 - `POST /api/events/bulk-create/` - Crear eventos masivamente
 - `GET /api/events/<id>/` - Ver detalle de evento
 - `PUT/PATCH /api/events/<id>/update/` - Actualizar evento
