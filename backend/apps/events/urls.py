@@ -1,7 +1,6 @@
 from django.urls import path
 from .views import (
     EventListView,
-    EventCreateView,
     bulk_create_events,
     EventDetailView,
     EventUpdateView,
@@ -18,8 +17,7 @@ app_name = 'events'
 
 urlpatterns = [
     # Event CRUD
-    path('', EventListView.as_view(), name='event_list'),
-    path('create/', EventCreateView.as_view(), name='event_create'),
+    path('', EventListView.as_view(), name='event_list_create'),  # GET list, POST create
     path('bulk-create/', bulk_create_events, name='event_bulk_create'),
     path('<uuid:pk>/', EventDetailView.as_view(), name='event_detail'),
     path('<uuid:pk>/update/', EventUpdateView.as_view(), name='event_update'),

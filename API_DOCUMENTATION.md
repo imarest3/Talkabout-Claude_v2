@@ -696,7 +696,7 @@ Get a list of all events with filtering capabilities.
 
 Create a single event for an activity.
 
-**Endpoint:** `POST /api/events/create/`
+**Endpoint:** `POST /api/events/`
 
 **Authentication:** Required (Teacher or Admin only)
 
