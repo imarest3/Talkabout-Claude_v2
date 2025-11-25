@@ -298,6 +298,20 @@ La documentación completa de la API REST está disponible en [`API_DOCUMENTATIO
 - `DELETE /api/activities/<code>/files/<file_id>/delete/` - Eliminar archivo
 - `GET /api/activities/<code>/statistics/` - Estadísticas de actividad
 
+**Eventos (Fase 4):**
+- `GET /api/events/` - Listar eventos (con filtros)
+- `POST /api/events/create/` - Crear evento individual
+- `POST /api/events/bulk-create/` - Crear eventos masivamente
+- `GET /api/events/<id>/` - Ver detalle de evento
+- `PUT/PATCH /api/events/<id>/update/` - Actualizar evento
+- `DELETE /api/events/<id>/delete/` - Eliminar evento
+- `POST /api/events/enroll/` - Inscribirse a evento
+- `POST /api/events/<id>/unenroll/` - Desinscribirse de evento
+- `GET /api/events/my-enrollments/` - Ver mis inscripciones
+- `GET /api/events/<id>/enrollments/` - Ver inscripciones del evento (teacher/admin)
+- `POST /api/events/convert-timezone/` - Convertir zonas horarias
+- `GET /api/events/<id>/statistics/` - Estadísticas del evento
+
 Ver [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) para ejemplos de uso, request/response formats, y códigos de error.
 
 ## Plan de Desarrollo Incremental
@@ -332,15 +346,25 @@ Ver [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) para ejemplos de uso, reque
 - Tests completos
 - Documentación de API actualizada
 
-### Fase 4: Gestión de Eventos
-- Crear eventos
-- Creación masiva
-- Conversor de zonas horarias
+### ✅ Fase 4: Gestión de Eventos (COMPLETADA)
+- Serializers para Event y Enrollment
+- CRUD completo de eventos (crear, listar, ver, actualizar, eliminar)
+- Creación masiva de eventos (rango fechas + horas UTC)
+- Inscripción y desinscripción de usuarios a eventos
+- Ver mis inscripciones
+- Ver inscripciones de un evento (solo teachers/admins)
+- Conversión de zonas horarias (UTC ↔ timezone local)
+- Estadísticas de eventos (inscritos, asistentes, cancelados)
+- Validaciones (eventos futuros, no editar pasados, etc.)
+- Tests completos
+- Documentación de API actualizada
 
-### Fase 5: Inscripción de Usuarios
-- Página embebible para edX
-- Inscripción/desinscripción
-- Horarios localizados
+### Fase 5: Sistema de Notificaciones y Emails
+- Emails de confirmación de inscripción
+- Recordatorios programados
+- Email de sala de espera
+- Manejo de respuestas (aceptar/rechazar)
+- Enlaces de desinscripción
 
 ### Fase 6-13: Ver plan completo en documentación
 
