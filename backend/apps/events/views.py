@@ -103,16 +103,14 @@ def bulk_create_events(request):
     first_reminder_minutes = data.get('first_reminder_minutes')
     second_reminder_minutes = data.get('second_reminder_minutes')
 
-    # Generate events
-    events_created = []
+    # Generate event payloads and persist in bulk to keep DB writes consistent
+    events_to_create = []
     current_date = start_date
 
     while current_date <= end_date:
         for hour_str in hours_utc:
-            # Parse hour
             hour_time = datetime.strptime(hour_str, '%H:%M').time()
 
-            # Create datetime in UTC
             start_datetime = datetime.combine(current_date, hour_time)
             start_datetime = pytz.UTC.localize(start_datetime)
             end_datetime = start_datetime + timedelta(minutes=duration_minutes)
@@ -121,31 +119,30 @@ def bulk_create_events(request):
             if start_datetime <= django_timezone.now():
                 continue
 
-            # Create event
-            event = Event.objects.create(
+            events_to_create.append(Event(
                 activity=activity,
                 start_datetime=start_datetime,
                 end_datetime=end_datetime,
                 waiting_time_minutes=waiting_time_minutes,
                 first_reminder_minutes=first_reminder_minutes,
                 second_reminder_minutes=second_reminder_minutes
-            )
-            events_created.append(event)
+            ))
 
         current_date += timedelta(days=1)
 
+    created_events = Event.objects.bulk_create(events_to_create)
+
     # Re-fetch events with annotations for proper serialization
-    event_ids = [event.id for event in events_created]
+    event_ids = [event.id for event in created_events]
     events_with_annotations = Event.objects.filter(id__in=event_ids).select_related('activity').annotate(
         enrolled_count=Count('enrollments', filter=Q(enrollments__status='enrolled')),
         attended_count=Count('enrollments', filter=Q(enrollments__status='attended'))
     ).order_by('start_datetime')
 
-    # Serialize and return
     serializer = EventSerializer(events_with_annotations, many=True)
 
     return Response({
-        'message': f'Successfully created {len(events_created)} events',
+        'message': f'Successfully created {len(created_events)} events',
         'events': serializer.data
     }, status=status.HTTP_201_CREATED)
 
