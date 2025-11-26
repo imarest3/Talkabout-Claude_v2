@@ -51,8 +51,8 @@ class EventListView(generics.ListCreateAPIView):
     def get_queryset(self):
         """Get events with enrollment counts."""
         queryset = Event.objects.select_related('activity').annotate(
-            enrolled_count=Count('enrollments', filter=Q(enrollments__status=Enrollment.Status.ENROLLED.value)),
-            attended_count=Count('enrollments', filter=Q(enrollments__status=Enrollment.Status.ATTENDED.value))
+            enrolled_count=Count('enrollments', filter=Q(enrollments__status='enrolled')),
+            attended_count=Count('enrollments', filter=Q(enrollments__status='attended'))
         )
 
         # Filter by activity code if provided
@@ -137,8 +137,8 @@ def bulk_create_events(request):
     # Re-fetch events with annotations for proper serialization
     event_ids = [event.id for event in events_created]
     events_with_annotations = Event.objects.filter(id__in=event_ids).select_related('activity').annotate(
-        enrolled_count=Count('enrollments', filter=Q(enrollments__status=Enrollment.Status.ENROLLED.value)),
-        attended_count=Count('enrollments', filter=Q(enrollments__status=Enrollment.Status.ATTENDED.value))
+        enrolled_count=Count('enrollments', filter=Q(enrollments__status='enrolled')),
+        attended_count=Count('enrollments', filter=Q(enrollments__status='attended'))
     ).order_by('start_datetime')
 
     # Serialize and return
@@ -158,8 +158,8 @@ class EventDetailView(generics.RetrieveAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
     queryset = Event.objects.select_related('activity').annotate(
-        enrolled_count=Count('enrollments', filter=Q(enrollments__status=Enrollment.Status.ENROLLED.value)),
-        attended_count=Count('enrollments', filter=Q(enrollments__status=Enrollment.Status.ATTENDED.value))
+        enrolled_count=Count('enrollments', filter=Q(enrollments__status='enrolled')),
+        attended_count=Count('enrollments', filter=Q(enrollments__status='attended'))
     )
 
 
