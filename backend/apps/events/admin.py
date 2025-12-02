@@ -19,8 +19,8 @@ class EventAdmin(admin.ModelAdmin):
         'start_datetime',
         'end_datetime',
         'status',
-        'enrolled_count',
-        'attended_count',
+        'get_enrolled_count',
+        'get_attended_count',
         'created_at'
     )
     list_filter = ('status', 'start_datetime', 'activity')
@@ -31,8 +31,8 @@ class EventAdmin(admin.ModelAdmin):
         'first_reminder_sent',
         'second_reminder_sent',
         'waiting_email_sent',
-        'enrolled_count',
-        'attended_count'
+        'get_enrolled_count',
+        'get_attended_count'
     )
     inlines = [EnrollmentInline]
 
@@ -53,7 +53,7 @@ class EventAdmin(admin.ModelAdmin):
             )
         }),
         ('Statistics', {
-            'fields': ('enrolled_count', 'attended_count'),
+            'fields': ('get_enrolled_count', 'get_attended_count'),
             'classes': ('collapse',)
         }),
         ('Timestamps', {
@@ -61,6 +61,16 @@ class EventAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+    @admin.display(description='Enrolled')
+    def get_enrolled_count(self, obj):
+        """Get count of enrolled users."""
+        return obj.enrollments.filter(status=Enrollment.Status.ENROLLED).count()
+
+    @admin.display(description='Attended')
+    def get_attended_count(self, obj):
+        """Get count of attended users."""
+        return obj.enrollments.filter(status=Enrollment.Status.ATTENDED).count()
 
 
 @admin.register(Enrollment)

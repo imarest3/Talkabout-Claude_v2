@@ -2,6 +2,7 @@ from rest_framework import generics, status, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Count
 from django.utils import timezone as django_timezone
@@ -45,7 +46,7 @@ class EventListView(generics.ListCreateAPIView):
     def get_permissions(self):
         """Only teachers and admins can create events."""
         if self.request.method == 'POST':
-            return [IsAuthenticated(), IsTeacherOrAdmin()]
+            return [IsTeacherOrAdmin()]
         return [IsAuthenticated()]
 
     def get_queryset(self):
@@ -69,14 +70,18 @@ class EventListView(generics.ListCreateAPIView):
                 start_dt = datetime.fromisoformat(start_date)
                 queryset = queryset.filter(start_datetime__gte=start_dt)
             except ValueError:
-                pass
+                raise ValidationError({
+                    'start_date': f'Invalid date format: "{start_date}". Use ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS).'
+                })
 
         if end_date:
             try:
                 end_dt = datetime.fromisoformat(end_date)
                 queryset = queryset.filter(start_datetime__lte=end_dt)
             except ValueError:
-                pass
+                raise ValidationError({
+                    'end_date': f'Invalid date format: "{end_date}". Use ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS).'
+                })
 
         return queryset
 
