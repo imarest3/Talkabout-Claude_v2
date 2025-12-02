@@ -132,14 +132,27 @@ def bulk_create_events(request):
 
     created_events = Event.objects.bulk_create(events_to_create)
 
-    # Re-fetch events with annotations for proper serialization
+    # Re-fetch events with annotations for proper serialization.
+    # SQLite (used in local/dev) has a 999-parameter limit that can be exceeded
+    # when creating hundreds of events at once. Chunk the lookups to avoid
+    # hitting that limit while still returning a single ordered list.
     event_ids = [event.id for event in created_events]
-    events_with_annotations = Event.objects.filter(id__in=event_ids).select_related('activity').annotate(
-        enrolled_count=Count('enrollments', filter=Q(enrollments__status='enrolled')),
-        attended_count=Count('enrollments', filter=Q(enrollments__status='attended'))
-    ).order_by('start_datetime')
+    annotated_events = []
+    chunk_size = 500
 
-    serializer = EventSerializer(events_with_annotations, many=True)
+    for start in range(0, len(event_ids), chunk_size):
+        chunk_ids = event_ids[start:start + chunk_size]
+        annotated_events.extend(
+            Event.objects.filter(id__in=chunk_ids)
+            .select_related('activity')
+            .annotate(
+                enrolled_count=Count('enrollments', filter=Q(enrollments__status='enrolled')),
+                attended_count=Count('enrollments', filter=Q(enrollments__status='attended'))
+            )
+        )
+
+    annotated_events = sorted(annotated_events, key=lambda event: event.start_datetime)
+    serializer = EventSerializer(annotated_events, many=True)
 
     return Response({
         'message': f'Successfully created {len(created_events)} events',
