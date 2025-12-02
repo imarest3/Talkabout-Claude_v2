@@ -63,16 +63,6 @@ class Event(models.Model):
     def __str__(self):
         return f"{self.activity.code} - {self.start_datetime}"
 
-    @property
-    def enrolled_count(self):
-        """Get count of enrolled users."""
-        return self.enrollments.filter(status=Enrollment.Status.ENROLLED).count()
-
-    @property
-    def attended_count(self):
-        """Get count of users who actually attended."""
-        return self.enrollments.filter(status=Enrollment.Status.ATTENDED).count()
-
 
 class Enrollment(models.Model):
     """Enrollment model linking users to events."""

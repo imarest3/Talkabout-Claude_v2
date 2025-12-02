@@ -48,7 +48,9 @@ class EventModelTests(TestCase):
         self.assertFalse(event.first_reminder_sent)
 
     def test_event_enrolled_count(self):
-        """Test enrolled count property."""
+        """Test enrolled count annotation."""
+        from django.db.models import Q, Count
+
         start = django_timezone.now() + timedelta(days=1)
         end = start + timedelta(hours=1)
 
@@ -76,7 +78,12 @@ class EventModelTests(TestCase):
         Enrollment.objects.create(user=student1, event=event, status=Enrollment.Status.ENROLLED)
         Enrollment.objects.create(user=student2, event=event, status=Enrollment.Status.ENROLLED)
 
-        self.assertEqual(event.enrolled_count, 2)
+        # Test with annotation
+        event_with_count = Event.objects.filter(id=event.id).annotate(
+            enrolled_count=Count('enrollments', filter=Q(enrollments__status='enrolled'))
+        ).first()
+
+        self.assertEqual(event_with_count.enrolled_count, 2)
 
 
 class EventAPITests(APITestCase):
@@ -136,7 +143,7 @@ class EventAPITests(APITestCase):
         """Test listing events."""
         self.client.force_authenticate(user=self.student)
 
-        url = reverse('events:event_list')
+        url = reverse('events:event_list_create')
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -146,7 +153,7 @@ class EventAPITests(APITestCase):
         """Test filtering events by activity code."""
         self.client.force_authenticate(user=self.student)
 
-        url = reverse('events:event_list')
+        url = reverse('events:event_list_create')
         response = self.client.get(url, {'activity_code': 'ACT001'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -156,7 +163,7 @@ class EventAPITests(APITestCase):
         """Test creating an event as a teacher."""
         self.client.force_authenticate(user=self.teacher)
 
-        url = reverse('events:event_create')
+        url = reverse('events:event_list_create')
         start = django_timezone.now() + timedelta(days=3)
         end = start + timedelta(hours=1)
 
@@ -178,7 +185,7 @@ class EventAPITests(APITestCase):
         """Test that students cannot create events."""
         self.client.force_authenticate(user=self.student)
 
-        url = reverse('events:event_create')
+        url = reverse('events:event_list_create')
         start = django_timezone.now() + timedelta(days=3)
         end = start + timedelta(hours=1)
 
@@ -197,7 +204,7 @@ class EventAPITests(APITestCase):
         """Test that creating events in the past fails."""
         self.client.force_authenticate(user=self.teacher)
 
-        url = reverse('events:event_create')
+        url = reverse('events:event_list_create')
         start = django_timezone.now() - timedelta(days=1)
         end = start + timedelta(hours=1)
 

@@ -1,5 +1,7 @@
 import uuid
+import pytz
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.timezone import now as timezone_now
 
@@ -72,10 +74,31 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"{self.user_code} ({self.get_role_display()})"
 
+    def clean(self):
+        """Validate model fields."""
+        super().clean()
+
+        # Validate timezone
+        if self.timezone:
+            try:
+                pytz.timezone(self.timezone)
+            except pytz.UnknownTimeZoneError:
+                raise ValidationError({
+                    'timezone': f'Invalid timezone: "{self.timezone}". Must be a valid pytz timezone (e.g., "America/Mexico_City", "UTC").'
+                })
+
+    def save(self, *args, **kwargs):
+        """Override save to validate custom fields."""
+        # Only run our custom clean() validation, not full_clean()
+        # This avoids issues with password validation in edX registration
+        self.clean()
+        super().save(*args, **kwargs)
+
     def anonymize(self):
         """Anonymize user data when they unsubscribe."""
         self.email = None
         self.user_code = f"anonymous_{self.id}"
         self.is_anonymized = True
         self.is_active = False
-        self.save()
+        # Skip validation when anonymizing
+        super(User, self).save()
