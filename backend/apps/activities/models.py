@@ -1,7 +1,39 @@
 import uuid
+import os
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.timezone import now as timezone_now
 from apps.users.models import User
+
+
+def validate_file_extension(value):
+    """Validate that uploaded file has an allowed extension."""
+    # Allowed extensions (safe file types)
+    allowed_extensions = [
+        '.pdf', '.doc', '.docx', '.txt', '.rtf',  # Documents
+        '.xls', '.xlsx', '.csv',  # Spreadsheets
+        '.ppt', '.pptx',  # Presentations
+        '.jpg', '.jpeg', '.png', '.gif', '.svg',  # Images
+        '.mp3', '.mp4', '.wav', '.avi', '.mov',  # Media
+        '.zip', '.rar',  # Archives
+    ]
+
+    ext = os.path.splitext(value.name)[1].lower()
+    if ext not in allowed_extensions:
+        raise ValidationError(
+            f'Unsupported file extension: {ext}. '
+            f'Allowed extensions: {", ".join(allowed_extensions)}'
+        )
+
+
+def validate_file_size(value):
+    """Validate that uploaded file size is within limit (max 50MB)."""
+    max_size = 50 * 1024 * 1024  # 50 MB in bytes
+    if value.size > max_size:
+        raise ValidationError(
+            f'File size too large. Maximum allowed size is 50MB. '
+            f'Your file is {round(value.size / (1024 * 1024), 2)}MB.'
+        )
 
 
 class Activity(models.Model):
@@ -41,7 +73,10 @@ class ActivityFile(models.Model):
         on_delete=models.CASCADE,
         related_name='files'
     )
-    file = models.FileField(upload_to='activity_files/%Y/%m/%d/')
+    file = models.FileField(
+        upload_to='activity_files/%Y/%m/%d/',
+        validators=[validate_file_extension, validate_file_size]
+    )
     filename = models.CharField(max_length=255)
     uploaded_at = models.DateTimeField(default=timezone_now)
 

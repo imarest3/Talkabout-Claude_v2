@@ -58,6 +58,8 @@ class Event(models.Model):
         indexes = [
             models.Index(fields=['activity', 'start_datetime']),
             models.Index(fields=['status', 'start_datetime']),
+            models.Index(fields=['created_at']),  # For filtering/ordering by creation date
+            models.Index(fields=['start_datetime', 'status']),  # For Celery tasks filtering
         ]
 
     def __str__(self):
@@ -108,6 +110,7 @@ class Enrollment(models.Model):
         indexes = [
             models.Index(fields=['user', 'status']),
             models.Index(fields=['event', 'status']),
+            models.Index(fields=['-enrolled_at']),  # For ordering by enrollment date
         ]
 
     def __str__(self):
