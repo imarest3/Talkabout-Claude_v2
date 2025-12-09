@@ -228,36 +228,35 @@ def activity_statistics(request, code):
             'error': 'Activity not found'
         }, status=status.HTTP_404_NOT_FOUND)
 
-    # Calculate statistics
-    events = activity.events.all()
-    total_events = events.count()
-    active_events = events.filter(status='scheduled').count()
-    completed_events = events.filter(status='completed').count()
-
-    # Total enrollments across all events
+    # Calculate statistics using aggregations (more efficient)
+    from django.db.models import Count, Q
     from apps.events.models import Enrollment
-    total_enrollments = Enrollment.objects.filter(
+
+    event_stats = activity.events.aggregate(
+        total_events=Count('id'),
+        active_events=Count('id', filter=Q(status='scheduled')),
+        completed_events=Count('id', filter=Q(status='completed'))
+    )
+
+    enrollment_stats = Enrollment.objects.filter(
         event__activity=activity
-    ).count()
+    ).aggregate(
+        total_enrollments=Count('id'),
+        enrolled_count=Count('id', filter=Q(status='enrolled')),
+        attended_count=Count('id', filter=Q(status='attended'))
+    )
 
-    enrolled_count = Enrollment.objects.filter(
-        event__activity=activity,
-        status='enrolled'
-    ).count()
-
-    attended_count = Enrollment.objects.filter(
-        event__activity=activity,
-        status='attended'
-    ).count()
+    total_enrollments = enrollment_stats['total_enrollments']
+    attended_count = enrollment_stats['attended_count']
 
     return Response({
         'activity_code': activity.code,
         'activity_title': activity.title,
-        'total_events': total_events,
-        'active_events': active_events,
-        'completed_events': completed_events,
+        'total_events': event_stats['total_events'],
+        'active_events': event_stats['active_events'],
+        'completed_events': event_stats['completed_events'],
         'total_enrollments': total_enrollments,
-        'currently_enrolled': enrolled_count,
+        'currently_enrolled': enrollment_stats['enrolled_count'],
         'total_attended': attended_count,
         'attendance_rate': (
             round((attended_count / total_enrollments * 100), 2)
