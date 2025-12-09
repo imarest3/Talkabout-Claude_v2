@@ -2,6 +2,7 @@
 Django settings for talkabout project.
 """
 import os
+import secrets
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -12,7 +13,13 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production')
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    if os.getenv('DJANGO_ENV') == 'production':
+        raise ValueError('SECRET_KEY must be set in production environment')
+    # Generate a random secret key for development
+    SECRET_KEY = secrets.token_urlsafe(50)
+    print('WARNING: Using auto-generated SECRET_KEY for development. Set SECRET_KEY in .env for production.')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
@@ -136,11 +143,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS Settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = os.getenv(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000'
+).split(',')
+CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS', 'True') == 'True'
 
 # REST Framework settings
 REST_FRAMEWORK = {
@@ -203,3 +210,25 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER', 'noreply@talkabout.com')
 
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
+
+# Security Settings for Production
+if not DEBUG:
+    # HTTPS/SSL
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # Cookies
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
+
+    # HSTS (HTTP Strict Transport Security)
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', 31536000))  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Additional Security Headers
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
