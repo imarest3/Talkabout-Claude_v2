@@ -1,0 +1,46 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Recordatorio - {{ activity.title }}{% endblock %}
+
+{% block content %}
+{% if reminder_type == 'first' %}
+<h2>📅 Recordatorio: Próxima sesión programada</h2>
+<p>Hola <strong>{{ user.user_code }}</strong>,</p>
+<p>Te recordamos que tienes una sesión de conversación programada próximamente:</p>
+{% else %}
+<h2>⏰ ¡Último recordatorio! Tu sesión es hoy</h2>
+<p>Hola <strong>{{ user.user_code }}</strong>,</p>
+<p>¡Tu sesión de conversación comienza pronto!</p>
+{% endif %}
+
+<div class="event-details">
+    <h3>{{ activity.title }}</h3>
+    <p><strong>📅 Fecha:</strong> {{ event.start_datetime|date:"d/m/Y" }}</p>
+    <p><strong>🕐 Hora:</strong> {{ event.start_datetime|time:"H:i" }} - {{ event.end_datetime|time:"H:i" }} (UTC)</p>
+    {% if reminder_type == 'second' %}
+    <p><strong>🚪 Sala de espera:</strong> Abre {{ event.waiting_time_minutes }} minutos antes</p>
+    {% endif %}
+</div>
+
+{% if reminder_type == 'first' %}
+<p><strong>Recuerda:</strong></p>
+<ul>
+    <li>🔔 Recibirás otro recordatorio más cercano a la hora</li>
+    <li>📝 Prepara tus materiales si los hay</li>
+    <li>🌐 Verifica tu conexión a internet</li>
+</ul>
+{% else %}
+<p><strong>¡Prepárate!</strong></p>
+<ul>
+    <li>🚪 Entra a la sala de espera cuando esté disponible</li>
+    <li>🎥 Verifica tu cámara y micrófono</li>
+    <li>💬 Prepárate para conversar</li>
+</ul>
+{% endif %}
+
+<p>¡Nos vemos pronto!</p>
+
+<p style="margin-top: 30px;">
+    <strong>Equipo Talkabout</strong>
+</p>
+{% endblock %}
