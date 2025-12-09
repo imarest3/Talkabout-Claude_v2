@@ -1,0 +1,42 @@
+{% extends "emails/base.html" %}
+
+{% block title %}¡Sala de espera abierta! - {{ activity.title }}{% endblock %}
+
+{% block content %}
+<h2>🚪 ¡La sala de espera está abierta!</h2>
+
+<p>Hola <strong>{{ user.user_code }}</strong>,</p>
+
+<p>Tu sesión de conversación comienza muy pronto. ¡La sala de espera ya está disponible!</p>
+
+<div class="event-details">
+    <h3>{{ activity.title }}</h3>
+    <p><strong>📅 Fecha:</strong> {{ event.start_datetime|date:"d/m/Y" }}</p>
+    <p><strong>🕐 Hora de inicio:</strong> {{ event.start_datetime|time:"H:i" }} (UTC)</p>
+</div>
+
+<p style="text-align: center;">
+    <a href="{{ waiting_room_url }}" class="btn">🚪 Entrar a la sala de espera</a>
+</p>
+
+<p><strong>Instrucciones:</strong></p>
+<ol>
+    <li>Haz clic en el botón de arriba para entrar</li>
+    <li>Espera en la sala hasta que comience el evento</li>
+    <li>Serás asignado automáticamente a un grupo</li>
+    <li>Se te redirigirá a la videoconferencia cuando esté lista</li>
+</ol>
+
+<p><strong>⚠️ Importante:</strong></p>
+<ul>
+    <li>Debes estar conectado en la sala de espera para participar</li>
+    <li>Si no entras a tiempo, no podrás unirte al grupo</li>
+    <li>Verifica tu cámara y micrófono antes de entrar</li>
+</ul>
+
+<p>¡Nos vemos en la sesión!</p>
+
+<p style="margin-top: 30px;">
+    <strong>Equipo Talkabout</strong>
+</p>
+{% endblock %}
