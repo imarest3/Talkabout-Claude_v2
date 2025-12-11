@@ -20,15 +20,17 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'talkabout.settings')
 # is populated before importing code that may import ORM models.
 django_asgi_app = get_asgi_application()
 
-# Import websocket routing (will be created in future phases)
-# from apps.meetings import routing as meeting_routing
+# Import websocket routing
+from apps.events import routing as events_routing
+# from apps.meetings import routing as meeting_routing (for future phases)
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             URLRouter(
-                # meeting_routing.websocket_urlpatterns
+                events_routing.websocket_urlpatterns +
+                # meeting_routing.websocket_urlpatterns +  (for future phases)
                 []
             )
         )
