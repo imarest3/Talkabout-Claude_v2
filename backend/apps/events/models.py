@@ -136,3 +136,68 @@ class Enrollment(models.Model):
         """Mark user as no-show."""
         self.status = self.Status.NO_SHOW
         self.save()
+
+
+class WaitingRoomParticipant(models.Model):
+    """Track users connected to the waiting room."""
+
+    class Status(models.TextChoices):
+        WAITING = 'waiting', 'Waiting'
+        READY = 'ready', 'Ready'
+        DISCONNECTED = 'disconnected', 'Disconnected'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='waiting_room_participants'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='waiting_rooms'
+    )
+    enrollment = models.ForeignKey(
+        Enrollment,
+        on_delete=models.CASCADE,
+        related_name='waiting_room_entries',
+        null=True,
+        blank=True
+    )
+    joined_at = models.DateTimeField(default=timezone_now)
+    last_seen = models.DateTimeField(default=timezone_now)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.WAITING
+    )
+    connection_id = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        db_table = 'waiting_room_participants'
+        verbose_name = 'Waiting Room Participant'
+        verbose_name_plural = 'Waiting Room Participants'
+        unique_together = [['event', 'user']]
+        ordering = ['joined_at']
+        indexes = [
+            models.Index(fields=['event', 'status']),
+            models.Index(fields=['user', 'event']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.user_code} waiting for {self.event}"
+
+    def mark_ready(self):
+        """Mark participant as ready for meeting assignment."""
+        self.status = self.Status.READY
+        self.save()
+
+    def mark_disconnected(self):
+        """Mark participant as disconnected."""
+        self.status = self.Status.DISCONNECTED
+        self.save()
+
+    def update_last_seen(self):
+        """Update last seen timestamp."""
+        self.last_seen = timezone_now()
+        self.save(update_fields=['last_seen'])
