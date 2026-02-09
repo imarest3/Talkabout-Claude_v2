@@ -70,3 +70,13 @@ build/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Test scripts (no incluir en producción)
+verify_api.py
+create_test_data.py
+backend/verify_api.py
+backend/create_test_data.py
