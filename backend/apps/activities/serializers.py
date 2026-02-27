@@ -99,6 +99,8 @@ class ActivityCreateUpdateSerializer(serializers.ModelSerializer):
 
 class ActivityFileUploadSerializer(serializers.ModelSerializer):
     """Serializer for uploading files to an activity."""
+    
+    filename = serializers.CharField(max_length=255, required=False, allow_blank=True)
 
     class Meta:
         model = ActivityFile

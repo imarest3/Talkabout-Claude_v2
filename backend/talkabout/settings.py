@@ -200,13 +200,19 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
 # Email Configuration
+from email.utils import formataddr
+
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.upv.es')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 465))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 's-emoocs@upv.es')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER', 'noreply@talkabout.com')
+
+EMAIL_DISPLAY_NAME = os.getenv('EMAIL_DISPLAY_NAME', 'Youtube UPV')
+EMAIL_DISPLAY_ADDRESS = os.getenv('EMAIL_DISPLAY_ADDRESS', 'youtube@upv.es')
+DEFAULT_FROM_EMAIL = formataddr((EMAIL_DISPLAY_NAME, EMAIL_DISPLAY_ADDRESS))
 
 # Frontend URL for email links
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')

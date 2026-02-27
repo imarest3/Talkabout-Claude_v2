@@ -12,6 +12,7 @@ from .views import (
     convert_timezone,
     event_statistics,
 )
+from apps.meetings.views import MyMeetingRetrieveView
 
 app_name = 'events'
 
@@ -28,6 +29,9 @@ urlpatterns = [
     path('<uuid:event_id>/unenroll/', unenroll_event, name='unenroll_event'),
     path('my-enrollments/', MyEnrollmentsView.as_view(), name='my_enrollments'),
     path('<uuid:pk>/enrollments/', EventEnrollmentsView.as_view(), name='event_enrollments'),
+
+    # Meetings
+    path('<uuid:event_id>/my-meeting/', MyMeetingRetrieveView.as_view(), name='my_meeting'),
 
     # Utilities
     path('convert-timezone/', convert_timezone, name='convert_timezone'),
