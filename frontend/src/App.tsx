@@ -1,11 +1,15 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline, Box, Typography } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { Container, Typography, Box } from '@mui/material';
 
-// Create a client for React Query
+import theme from './theme';
+import MainLayout from './components/layout/MainLayout';
+import { AuthProvider } from './context/AuthContext';
+import LoginPage from './pages/auth/LoginPage';
+
+// Crear cliente de React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -15,35 +19,42 @@ const queryClient = new QueryClient({
   },
 });
 
-// Create Material-UI theme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
+// Componente placeholder para desarrollo
+const Placeholder = ({ title }: { title: string }) => (
+  <Box sx={{ textAlign: 'center', py: 8 }}>
+    <Typography variant="h4" color="primary" gutterBottom>
+      {title}
+    </Typography>
+    <Typography variant="body1" color="text.secondary">
+      Componente en construcción (Próximamente)...
+    </Typography>
+  </Box>
+);
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Router>
-          <Container maxWidth="lg">
-            <Box sx={{ my: 4 }}>
-              <Typography variant="h3" component="h1" gutterBottom>
-                Talkabout
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Conversation activities for MOOCs - Coming soon...
-              </Typography>
-            </Box>
-          </Container>
-        </Router>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<Navigate to="/activities" replace />} />
+                <Route path="activities" element={<Placeholder title="Lista de Actividades" />} />
+                <Route path="activities/:id" element={<Placeholder title="Detalle de Actividad" />} />
+                <Route path="waiting-room/:eventId" element={<Placeholder title="Sala de Espera" />} />
+                <Route path="profile" element={<Placeholder title="Perfil de Usuario" />} />
+
+                {/* Rutas Públicas de Auth */}
+                <Route path="login" element={<LoginPage />} />
+                <Route path="register" element={<Placeholder title="Registro de Usuario" />} />
+
+                <Route path="*" element={<Placeholder title="Error 404 - Página No Encontrada" />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
