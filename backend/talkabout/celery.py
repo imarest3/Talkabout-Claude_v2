@@ -16,13 +16,25 @@ app.autodiscover_tasks()
 
 # Celery Beat schedule for periodic tasks
 app.conf.beat_schedule = {
-    'send-event-reminders': {
-        'task': 'apps.events.tasks.send_event_reminders',
-        'schedule': crontab(minute='*/5'),  # Run every 5 minutes
+    'send-first-reminders': {
+        'task': 'apps.events.tasks.send_first_reminders',
+        'schedule': crontab(minute='*/5'),
+    },
+    'send-second-reminders': {
+        'task': 'apps.events.tasks.send_second_reminders',
+        'schedule': crontab(minute='*/5'),
+    },
+    'send-waiting-room-notifications': {
+        'task': 'apps.events.tasks.send_waiting_room_notifications',
+        'schedule': crontab(minute='*/1'),
+    },
+    'cleanup-old-events': {
+        'task': 'apps.events.tasks.cleanup_old_events',
+        'schedule': crontab(minute='*/10'),
     },
     'create-meetings': {
         'task': 'apps.events.tasks.create_meetings_for_events',
-        'schedule': crontab(minute='*/1'),  # Run every minute
+        'schedule': crontab(minute='*/1'),
     },
 }
 

@@ -8,6 +8,9 @@ import theme from './theme';
 import MainLayout from './components/layout/MainLayout';
 import { AuthProvider } from './context/AuthContext';
 import LoginPage from './pages/auth/LoginPage';
+import ActivityListPage from './pages/activities/ActivityListPage';
+import ActivityDetailPage from './pages/activities/ActivityDetailPage';
+import WaitingRoomPage from './pages/events/WaitingRoomPage';
 
 // Crear cliente de React Query
 const queryClient = new QueryClient({
@@ -41,9 +44,9 @@ function App() {
             <Routes>
               <Route path="/" element={<MainLayout />}>
                 <Route index element={<Navigate to="/activities" replace />} />
-                <Route path="activities" element={<Placeholder title="Lista de Actividades" />} />
-                <Route path="activities/:id" element={<Placeholder title="Detalle de Actividad" />} />
-                <Route path="waiting-room/:eventId" element={<Placeholder title="Sala de Espera" />} />
+                <Route path="activities" element={<ActivityListPage />} />
+                <Route path="activities/:id" element={<ActivityDetailPage />} />
+                <Route path="events/:eventId/waiting-room" element={<WaitingRoomPage />} />
                 <Route path="profile" element={<Placeholder title="Perfil de Usuario" />} />
 
                 {/* Rutas Públicas de Auth */}

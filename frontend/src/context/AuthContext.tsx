@@ -49,11 +49,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const logout = () => {
-        // Intentar invalidar en backend (best effort)
+    const logout = async () => {
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
-            apiClient.post('/users/auth/logout/', { refresh_token: refreshToken }).catch(e => console.error(e));
+            try {
+                await apiClient.post('/users/auth/logout/', { refresh_token: refreshToken });
+            } catch (e) {
+                console.error(e);
+            }
         }
 
         // Limpiar estado

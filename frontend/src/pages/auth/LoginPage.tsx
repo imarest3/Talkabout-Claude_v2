@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import upvLogo from '../../assets/upv-logo.png';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -40,6 +41,13 @@ const LoginPage: React.FC = () => {
     return (
         <Container maxWidth="xs">
             <Paper elevation={3} sx={{ padding: 4, mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Box
+                    component="img"
+                    src={upvLogo}
+                    alt="UPV Logo"
+                    sx={{ height: 60, mb: 3 }}
+                />
+
                 <Typography component="h1" variant="h5" color="primary" sx={{ fontWeight: 'bold', mb: 3 }}>
                     Iniciar Sesión
                 </Typography>
