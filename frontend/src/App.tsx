@@ -11,6 +11,7 @@ import LoginPage from './pages/auth/LoginPage';
 import ActivityListPage from './pages/activities/ActivityListPage';
 import ActivityDetailPage from './pages/activities/ActivityDetailPage';
 import WaitingRoomPage from './pages/events/WaitingRoomPage';
+import ProfilePage from './pages/profile/ProfilePage';
 
 // Crear cliente de React Query
 const queryClient = new QueryClient({
@@ -47,7 +48,7 @@ function App() {
                 <Route path="activities" element={<ActivityListPage />} />
                 <Route path="activities/:id" element={<ActivityDetailPage />} />
                 <Route path="events/:eventId/waiting-room" element={<WaitingRoomPage />} />
-                <Route path="profile" element={<Placeholder title="Perfil de Usuario" />} />
+                <Route path="profile" element={<ProfilePage />} />
 
                 {/* Rutas Públicas de Auth */}
                 <Route path="login" element={<LoginPage />} />
