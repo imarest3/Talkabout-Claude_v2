@@ -10,15 +10,20 @@ import {
     CircularProgress,
     Divider,
     Alert,
-    Snackbar
+    Snackbar,
+    Autocomplete
 } from '@mui/material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import SaveIcon from '@mui/icons-material/Save';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 import apiClient from '../../services/api/client';
 import { User } from '../../types';
+
+// Obtener la lista nativa de zonas horarias del navegador (cast a "any" para ignorar tipado antiguo de TypeScript)
+const timezones = (Intl as any).supportedValuesOf ? (Intl as any).supportedValuesOf('timeZone') : [];
 
 const ProfilePage: React.FC = () => {
     const queryClient = useQueryClient();
@@ -27,6 +32,13 @@ const ProfilePage: React.FC = () => {
         message: '',
         severity: 'success'
     });
+
+    // Función para detectar la zona horaria actual
+    const detectTimezone = () => {
+        const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        setProfileForm(prev => ({ ...prev, timezone: localZone }));
+        setSnackbar({ open: true, message: 'Zona horaria detectada automáticamente', severity: 'success' });
+    };
 
     // Estado del formulario de perfil
     const [profileForm, setProfileForm] = useState({
@@ -77,8 +89,6 @@ const ProfilePage: React.FC = () => {
     // 3. Mutación para cambiar contraseña
     const changePasswordMutation = useMutation({
         mutationFn: async (data: any) => {
-            // Se envía a endpoint de cambio de contraseña 
-            // NOTA: Ajusta la URL según corresponda a tu backend (ej: /users/profile/change-password/ o /users/auth/change-password/)
             const response = await apiClient.post('/users/profile/change-password/', data);
             return response.data;
         },
@@ -165,15 +175,34 @@ const ProfilePage: React.FC = () => {
                                 margin="normal"
                                 required
                             />
-                            <TextField
-                                fullWidth
-                                label="Zona Horaria"
-                                value={profileForm.timezone}
-                                onChange={(e) => setProfileForm({ ...profileForm, timezone: e.target.value })}
-                                margin="normal"
-                                helperText="Ejemplo: Europe/Madrid o America/Mexico_City"
-                                required
-                            />
+
+                            <Box sx={{ mt: 2, mb: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                <Autocomplete
+                                    options={timezones}
+                                    value={profileForm.timezone}
+                                    onChange={(_, newValue) => {
+                                        setProfileForm({ ...profileForm, timezone: newValue || '' });
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Zona Horaria"
+                                            required
+                                            helperText="Selecciona o busca tu zona horaria local"
+                                        />
+                                    )}
+                                />
+                                <Button
+                                    size="small"
+                                    variant="text"
+                                    color="secondary"
+                                    startIcon={<MyLocationIcon />}
+                                    onClick={detectTimezone}
+                                    sx={{ alignSelf: 'flex-start' }}
+                                >
+                                    Detectar automáticamente
+                                </Button>
+                            </Box>
 
                             <Button
                                 type="submit"

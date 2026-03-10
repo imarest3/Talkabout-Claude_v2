@@ -7,9 +7,11 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import EventIcon from '@mui/icons-material/Event';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../../services/api/client';
 import { Activity } from '../../types';
+import { useAuth } from '../../context/AuthContext';
+import AddIcon from '@mui/icons-material/Add';
 
 interface ActivitiesResponse {
     count: number;
@@ -20,6 +22,10 @@ interface ActivitiesResponse {
 
 const ActivityListPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    const isTeacherOrAdmin = user?.role === 'teacher' || user?.role === 'admin';
 
     // debounce search could be implemented, but simple enough for now
     const { data, isLoading, isError } = useQuery({
@@ -34,13 +40,25 @@ const ActivityListPage: React.FC = () => {
 
     return (
         <Container maxWidth="lg">
-            <Box sx={{ mb: 4, mt: 2 }}>
-                <Typography variant="h4" component="h1" gutterBottom color="primary.main" fontWeight="bold">
-                    Actividades Disponibles
-                </Typography>
-                <Typography variant="body1" color="text.secondary" gutterBottom>
-                    Explora y únete a los eventos de conversación programados.
-                </Typography>
+            <Box sx={{ mb: 4, mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                    <Typography variant="h4" component="h1" gutterBottom color="primary.main" fontWeight="bold">
+                        Actividades Disponibles
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary" gutterBottom>
+                        Explora y únete a los eventos de conversación programados.
+                    </Typography>
+                </Box>
+                {isTeacherOrAdmin && (
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        startIcon={<AddIcon />}
+                        onClick={() => navigate('/activities/create')}
+                    >
+                        Nueva Actividad
+                    </Button>
+                )}
             </Box>
 
             {/* Buscador */}

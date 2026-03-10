@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Container, Typography, Box, Paper, Grid, Button,
-    Skeleton, Divider, Chip, Alert, Accordion, AccordionSummary, AccordionDetails
+    Skeleton, Divider, Chip, Alert, Accordion, AccordionSummary, AccordionDetails,
+    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,6 +10,9 @@ import { formatInTimeZone } from 'date-fns-tz';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import apiClient from '../../services/api/client';
 import { Activity, Event } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -31,6 +35,9 @@ const ActivityDetailPage: React.FC = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { user } = useAuth();
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+    const isTeacherOrAdmin = user?.role === 'teacher' || user?.role === 'admin';
 
     // Obtener la zona horaria del usuario o defaults a local
     const userTimezone = user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -107,6 +114,18 @@ const ActivityDetailPage: React.FC = () => {
                 queryClient.invalidateQueries({ queryKey: ['my-enrollments'] }),
                 queryClient.invalidateQueries({ queryKey: ['events', activityCode] })
             ]);
+        }
+    });
+
+    // Delete Mutation
+    const deleteActivityMutation = useMutation({
+        mutationFn: async () => {
+            const response = await apiClient.delete(`/activities/${activityCode}/delete/`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['activities'] });
+            navigate('/activities');
         }
     });
 
@@ -235,6 +254,27 @@ const ActivityDetailPage: React.FC = () => {
                                 color={activity.is_active ? 'success' : 'default'}
                             />
                         </Box>
+                        {isTeacherOrAdmin && (
+                            <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<EditIcon />}
+                                    size="small"
+                                    onClick={() => navigate(`/activities/${activityCode}/edit`)}
+                                >
+                                    Editar
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    color="error"
+                                    startIcon={<DeleteIcon />}
+                                    size="small"
+                                    onClick={() => setOpenDeleteDialog(true)}
+                                >
+                                    Eliminar
+                                </Button>
+                            </Box>
+                        )}
                         <Typography variant="subtitle1" color="text.secondary" gutterBottom>
                             Código: <strong>{activity.code}</strong> | Participantes máx por sala: {activity.max_participants_per_meeting}
                         </Typography>
@@ -292,13 +332,28 @@ const ActivityDetailPage: React.FC = () => {
                 {/* Columna Derecha: Eventos */}
                 <Grid item xs={12} md={4}>
                     <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
-                        <Typography variant="h6" gutterBottom fontWeight="bold">
-                            Próximos Eventos
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Horarios mostrados en tu zona horaria ({userTimezone})
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                            <Box>
+                                <Typography variant="h6" fontWeight="bold">
+                                    Próximos Eventos
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Horarios en tu zona ({userTimezone})
+                                </Typography>
+                            </Box>
+                            {isTeacherOrAdmin && (
+                                <Button
+                                    variant="contained"
+                                    size="small"
+                                    startIcon={<AddIcon />}
+                                    onClick={() => navigate(`/activities/${activityCode}/events/create`)}
+                                    sx={{ whiteSpace: 'nowrap', ml: 1 }}
+                                >
+                                    Nuevo
+                                </Button>
+                            )}
+                        </Box>
+                        <Divider sx={{ mb: 2, mt: 1 }} />
 
                         {isEventsLoading ? (
                             <Box display="flex" flexDirection="column" gap={2}>
@@ -329,6 +384,26 @@ const ActivityDetailPage: React.FC = () => {
                     )}
                 </Grid>
             </Grid>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={openDeleteDialog}
+                onClose={() => setOpenDeleteDialog(false)}
+            >
+                <DialogTitle>¿Eliminar actividad?</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        ¿Estás seguro que deseas eliminar esta actividad? Esta acción no se puede deshacer y eliminará todos los eventos asociados.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDeleteDialog(false)}>Cancelar</Button>
+                    <Button onClick={() => deleteActivityMutation.mutate()} color="error" autoFocus disabled={deleteActivityMutation.isPending}>
+                        {deleteActivityMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
         </Container>
     );
 };

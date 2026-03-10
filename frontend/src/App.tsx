@@ -10,7 +10,9 @@ import { AuthProvider } from './context/AuthContext';
 import LoginPage from './pages/auth/LoginPage';
 import ActivityListPage from './pages/activities/ActivityListPage';
 import ActivityDetailPage from './pages/activities/ActivityDetailPage';
+import ActivityFormPage from './pages/activities/ActivityFormPage';
 import WaitingRoomPage from './pages/events/WaitingRoomPage';
+import EventFormPage from './pages/events/EventFormPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import PrivateRoute from './components/auth/PrivateRoute';
 
@@ -54,7 +56,10 @@ function App() {
                 <Route element={<PrivateRoute />}>
                   <Route index element={<Navigate to="/activities" replace />} />
                   <Route path="activities" element={<ActivityListPage />} />
+                  <Route path="activities/create" element={<ActivityFormPage />} />
+                  <Route path="activities/:code/edit" element={<ActivityFormPage />} />
                   <Route path="activities/:id" element={<ActivityDetailPage />} />
+                  <Route path="activities/:code/events/create" element={<EventFormPage />} />
                   <Route path="events/:eventId/waiting-room" element={<WaitingRoomPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                 </Route>
