@@ -103,6 +103,17 @@ const WaitingRoomPage: React.FC = () => {
         return () => clearInterval(interval);
     }, [event, eventStatus]);
 
+    // Auto-redirección
+    useEffect(() => {
+        if (meetingData?.meeting_url) {
+            // Un pequeño timeout para que el usuario alcance a ver el mensaje de "Salas listas"
+            const timer = setTimeout(() => {
+                window.open(meetingData.meeting_url, '_blank', 'noopener,noreferrer');
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [meetingData?.meeting_url]);
+
     // Función auxiliar para botones
     const handleJoinMeeting = () => {
         if (meetingData?.meeting_url) {

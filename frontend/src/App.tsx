@@ -12,6 +12,7 @@ import ActivityListPage from './pages/activities/ActivityListPage';
 import ActivityDetailPage from './pages/activities/ActivityDetailPage';
 import WaitingRoomPage from './pages/events/WaitingRoomPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import PrivateRoute from './components/auth/PrivateRoute';
 
 // Crear cliente de React Query
 const queryClient = new QueryClient({
@@ -44,15 +45,19 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<MainLayout />}>
-                <Route index element={<Navigate to="/activities" replace />} />
-                <Route path="activities" element={<ActivityListPage />} />
-                <Route path="activities/:id" element={<ActivityDetailPage />} />
-                <Route path="events/:eventId/waiting-room" element={<WaitingRoomPage />} />
-                <Route path="profile" element={<ProfilePage />} />
 
-                {/* Rutas Públicas de Auth */}
+                {/* Rutas Públicas */}
                 <Route path="login" element={<LoginPage />} />
                 <Route path="register" element={<Placeholder title="Registro de Usuario" />} />
+
+                {/* Rutas Privadas */}
+                <Route element={<PrivateRoute />}>
+                  <Route index element={<Navigate to="/activities" replace />} />
+                  <Route path="activities" element={<ActivityListPage />} />
+                  <Route path="activities/:id" element={<ActivityDetailPage />} />
+                  <Route path="events/:eventId/waiting-room" element={<WaitingRoomPage />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                </Route>
 
                 <Route path="*" element={<Placeholder title="Error 404 - Página No Encontrada" />} />
               </Route>

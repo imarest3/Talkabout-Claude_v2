@@ -19,28 +19,30 @@ const Navbar: React.FC = () => {
             <Container maxWidth="lg">
                 <Toolbar disableGutters>
                     <Box
-                        component={Link}
-                        to="/"
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
-                            textDecoration: 'none',
                             flexGrow: 1,
                             gap: 2
                         }}
                     >
-                        <Box
-                            component="img"
-                            src={upvLogo}
-                            alt="UPV Logo"
-                            sx={{ height: 40 }}
-                        />
+                        <a href="https://www.upv.es/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center' }}>
+                            <Box
+                                component="img"
+                                src={upvLogo}
+                                alt="UPV Logo"
+                                sx={{ height: 40, display: 'block' }}
+                            />
+                        </a>
                         <Typography
+                            component={Link}
+                            to="/"
                             variant="h6"
                             sx={{
                                 fontWeight: 800,
                                 color: 'primary.main',
-                                letterSpacing: '-0.5px'
+                                letterSpacing: '-0.5px',
+                                textDecoration: 'none'
                             }}
                         >
                             TALKABOUT
