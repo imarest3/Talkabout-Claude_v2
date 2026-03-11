@@ -21,12 +21,15 @@ import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 import apiClient from '../../services/api/client';
 import { User } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
 // Obtener la lista nativa de zonas horarias del navegador (cast a "any" para ignorar tipado antiguo de TypeScript)
 const timezones = (Intl as any).supportedValuesOf ? (Intl as any).supportedValuesOf('timeZone') : [];
 
 const ProfilePage: React.FC = () => {
     const queryClient = useQueryClient();
+    const { updateUser } = useAuth();
+    
     const [snackbar, setSnackbar] = useState<{ open: boolean, message: string, severity: 'success' | 'error' }>({
         open: false,
         message: '',
@@ -77,8 +80,9 @@ const ProfilePage: React.FC = () => {
             const response = await apiClient.patch('/users/profile/update/', data);
             return response.data;
         },
-        onSuccess: () => {
+        onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['profile'] });
+            updateUser({ email: variables.email, timezone: variables.timezone });
             setSnackbar({ open: true, message: 'Perfil actualizado correctamente', severity: 'success' });
         },
         onError: () => {

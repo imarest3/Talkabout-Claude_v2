@@ -7,6 +7,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import SaveIcon from '@mui/icons-material/Save';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 import apiClient from '../../services/api/client';
 import { Activity } from '../../types';
@@ -18,7 +20,7 @@ const ActivityFormPage: React.FC = () => {
     const queryClient = useQueryClient();
 
     const [form, setForm] = useState({
-        code: '',
+        code: code || '',
         title: '',
         description: '',
         max_participants_per_meeting: 6,
@@ -54,7 +56,9 @@ const ActivityFormPage: React.FC = () => {
     const mutation = useMutation({
         mutationFn: async (data: typeof form) => {
             if (isEditing) {
-                const response = await apiClient.patch(`/activities/${code}/update/`, data);
+                // Removemos 'code' del payload de actualización para no interferir con las validaciones del serializer en Django
+                const { code: _ignoredCode, ...patchData } = data;
+                const response = await apiClient.patch(`/activities/${code}/update/`, patchData);
                 return response.data;
             } else {
                 const response = await apiClient.post('/activities/create/', data);
@@ -125,16 +129,17 @@ const ActivityFormPage: React.FC = () => {
                         margin="normal"
                         required
                     />
-                    <TextField
-                        fullWidth
-                        label="Descripción"
-                        value={form.description}
-                        onChange={(e) => setForm({ ...form, description: e.target.value })}
-                        margin="normal"
-                        required
-                        multiline
-                        rows={4}
-                    />
+                    <Box sx={{ mt: 2, mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Descripción (Soporta formato enriquecido) *
+                        </Typography>
+                        <ReactQuill
+                            theme="snow"
+                            value={form.description}
+                            onChange={(content: string) => setForm({ ...form, description: content })}
+                            style={{ height: '200px', marginBottom: '50px' }}
+                        />
+                    </Box>
                     <TextField
                         fullWidth
                         type="number"

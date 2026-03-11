@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import {
     Container, Typography, Box, Paper, Grid, Button,
     Skeleton, Divider, Chip, Alert, Accordion, AccordionSummary, AccordionDetails,
-    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
+    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+    IconButton, Tooltip
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -13,6 +14,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import apiClient from '../../services/api/client';
 import { Activity, Event } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -36,6 +38,7 @@ const ActivityDetailPage: React.FC = () => {
     const queryClient = useQueryClient();
     const { user } = useAuth();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [fileToDelete, setFileToDelete] = useState<{ id: string, filename: string } | null>(null);
 
     const isTeacherOrAdmin = user?.role === 'teacher' || user?.role === 'admin';
 
@@ -117,7 +120,7 @@ const ActivityDetailPage: React.FC = () => {
         }
     });
 
-    // Delete Mutation
+    // Delete Activity Mutation
     const deleteActivityMutation = useMutation({
         mutationFn: async () => {
             const response = await apiClient.delete(`/activities/${activityCode}/delete/`);
@@ -126,6 +129,43 @@ const ActivityDetailPage: React.FC = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['activities'] });
             navigate('/activities');
+        }
+    });
+
+    // File Upload Mutation
+    const uploadFileMutation = useMutation({
+        mutationFn: async (file: File) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await apiClient.post(`/activities/${activityCode}/files/upload/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['activity', activityCode] });
+        }
+    });
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            uploadFileMutation.mutate(file);
+        }
+        event.target.value = '';
+    };
+
+    // Delete File Mutation
+    const deleteFileMutation = useMutation({
+        mutationFn: async (fileId: string) => {
+            const response = await apiClient.delete(`/activities/${activityCode}/files/${fileId}/delete/`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['activity', activityCode] });
+            setFileToDelete(null);
         }
     });
 
@@ -304,27 +344,63 @@ const ActivityDetailPage: React.FC = () => {
                         )}
                     </Paper>
 
-                    {!isActivityLoading && activity?.files && activity.files.length > 0 && (
+                    {(!isActivityLoading && ((activity?.files?.length || 0) > 0 || isTeacherOrAdmin)) && (
                         <Paper elevation={1} sx={{ p: 3, mb: 4 }}>
-                            <Typography variant="h6" gutterBottom fontWeight="bold">
-                                Archivos Adjuntos
-                            </Typography>
-                            <Divider sx={{ mb: 2 }} />
-                            <Box display="flex" flexDirection="column" gap={1}>
-                                {activity.files.map((file) => (
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                <Typography variant="h6" fontWeight="bold">
+                                    Archivos Adjuntos
+                                </Typography>
+                                {isTeacherOrAdmin && (
                                     <Button
-                                        key={file.id}
-                                        href={file.file_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        startIcon={<AttachFileIcon />}
+                                        component="label"
                                         variant="outlined"
-                                        sx={{ justifyContent: 'flex-start', textTransform: 'none' }}
+                                        size="small"
+                                        startIcon={<CloudUploadIcon />}
+                                        disabled={uploadFileMutation.isPending}
                                     >
-                                        {file.filename || 'Documento adjunto'}
+                                        {uploadFileMutation.isPending ? 'Subiendo...' : 'Subir Archivo'}
+                                        <input
+                                            type="file"
+                                            hidden
+                                            onChange={handleFileUpload}
+                                        />
                                     </Button>
-                                ))}
+                                )}
                             </Box>
+                            <Divider sx={{ mb: 2 }} />
+                            {activity?.files && activity.files.length > 0 ? (
+                                <Box display="flex" flexDirection="column" gap={1}>
+                                    {activity.files.map((file) => (
+                                        <Box key={file.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Button
+                                                href={file.file_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                startIcon={<AttachFileIcon />}
+                                                variant="outlined"
+                                                sx={{ justifyContent: 'flex-start', textTransform: 'none', flexGrow: 1 }}
+                                            >
+                                                {file.filename || 'Documento adjunto'}
+                                            </Button>
+                                            {isTeacherOrAdmin && (
+                                                <Tooltip title="Eliminar archivo">
+                                                    <IconButton
+                                                        color="error"
+                                                        onClick={() => setFileToDelete(file)}
+                                                        size="small"
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            )}
+                                        </Box>
+                                    ))}
+                                </Box>
+                            ) : (
+                                <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2 }}>
+                                    No hay archivos adjuntos en esta actividad.
+                                </Typography>
+                            )}
                         </Paper>
                     )}
                 </Grid>
@@ -400,6 +476,25 @@ const ActivityDetailPage: React.FC = () => {
                     <Button onClick={() => setOpenDeleteDialog(false)}>Cancelar</Button>
                     <Button onClick={() => deleteActivityMutation.mutate()} color="error" autoFocus disabled={deleteActivityMutation.isPending}>
                         {deleteActivityMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete File Confirmation Dialog */}
+            <Dialog
+                open={!!fileToDelete}
+                onClose={() => setFileToDelete(null)}
+            >
+                <DialogTitle>¿Eliminar archivo adjunto?</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        ¿Estás seguro que deseas eliminar el archivo "{fileToDelete?.filename}"? Esta acción no se puede deshacer.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setFileToDelete(null)}>Cancelar</Button>
+                    <Button onClick={() => fileToDelete && deleteFileMutation.mutate(fileToDelete.id)} color="error" autoFocus disabled={deleteFileMutation.isPending}>
+                        {deleteFileMutation.isPending ? 'Eliminando...' : 'Eliminar'}
                     </Button>
                 </DialogActions>
             </Dialog>
