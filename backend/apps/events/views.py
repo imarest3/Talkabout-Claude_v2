@@ -85,6 +85,22 @@ class EventListView(generics.ListCreateAPIView):
 
         return queryset
 
+    def create(self, request, *args, **kwargs):
+        """Override create to return the full EventSerializer with default annotations."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        # We need to manually add the annotations that get_queryset would normally provide
+        # since this is a newly created instance with 0 enrollments
+        instance = serializer.instance
+        instance.enrolled_count = 0
+        instance.attended_count = 0
+        
+        response_serializer = EventSerializer(instance)
+        headers = self.get_success_headers(serializer.data)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsTeacherOrAdmin])

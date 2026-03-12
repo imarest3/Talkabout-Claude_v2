@@ -217,7 +217,6 @@ class EnrollmentSerializer(serializers.ModelSerializer):
             'id',
             'user',
             'user_code',
-            'event',
             'event_id',
             'event_start',
             'event_end',

@@ -3,7 +3,7 @@ import {
     Container, Typography, Box, Paper, Grid, Button,
     Skeleton, Divider, Chip, Alert, Accordion, AccordionSummary, AccordionDetails,
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-    IconButton, Tooltip
+    IconButton, Tooltip, Snackbar
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -29,7 +29,7 @@ interface EventsResponse {
 }
 
 interface EnrollmentsResponse {
-    results: Array<{ event: string; event_id: string; id: string; status: string }>;
+    results: Array<{ event_id: string; id: string; status: string }>;
 }
 
 const ActivityDetailPage: React.FC = () => {
@@ -39,6 +39,7 @@ const ActivityDetailPage: React.FC = () => {
     const { user } = useAuth();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [fileToDelete, setFileToDelete] = useState<{ id: string, filename: string } | null>(null);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     const isTeacherOrAdmin = user?.role === 'teacher' || user?.role === 'admin';
 
@@ -87,7 +88,7 @@ const ActivityDetailPage: React.FC = () => {
     const enrolledEventIds = new Set(
         myEnrollments
             ?.filter(e => e.status === 'enrolled')
-            .map(e => e.event_id || e.event) || []
+            .map(e => e.event_id) || []
     );
 
     // Mutaciones
@@ -101,6 +102,13 @@ const ActivityDetailPage: React.FC = () => {
                 queryClient.invalidateQueries({ queryKey: ['my-enrollments'] }),
                 queryClient.invalidateQueries({ queryKey: ['events', activityCode] })
             ]);
+        },
+        onError: (error: any) => {
+            const msg = error.response?.data?.event_id?.[0]
+                || error.response?.data?.detail
+                || error.response?.data?.error
+                || 'No se pudo completar la inscripción';
+            setErrorMsg(msg);
         }
     });
 
@@ -117,6 +125,13 @@ const ActivityDetailPage: React.FC = () => {
                 queryClient.invalidateQueries({ queryKey: ['my-enrollments'] }),
                 queryClient.invalidateQueries({ queryKey: ['events', activityCode] })
             ]);
+        },
+        onError: (error: any) => {
+            const msg = error.response?.data?.event_id?.[0]
+                || error.response?.data?.detail
+                || error.response?.data?.error
+                || 'No se pudo cancelar la inscripción';
+            setErrorMsg(msg);
         }
     });
 
@@ -498,6 +513,18 @@ const ActivityDetailPage: React.FC = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Error Snackbar */}
+            <Snackbar
+                open={!!errorMsg}
+                autoHideDuration={6000}
+                onClose={() => setErrorMsg(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={() => setErrorMsg(null)} severity="error" sx={{ width: '100%' }}>
+                    {errorMsg}
+                </Alert>
+            </Snackbar>
 
         </Container>
     );

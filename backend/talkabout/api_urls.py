@@ -12,7 +12,4 @@ urlpatterns = [
 
     # Events
     path('events/', include('apps.events.urls')),
-
-    # App URLs (will be added in future phases)
-    # path('meetings/', include('apps.meetings.urls')),
 ]

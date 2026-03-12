@@ -49,11 +49,16 @@ export interface Event {
 
 export interface Enrollment {
     id: string;
-    student: string;
-    student_name: string;
-    event: string;
+    user: string;
+    user_code: string;
+    event_id: string;
+    event_start: string;
+    event_end: string;
+    activity_code: string;
+    activity_title: string;
     enrolled_at: string;
-    attended: boolean;
+    updated_at: string;
+    status: 'enrolled' | 'cancelled' | 'attended' | 'no_show';
 }
 
 export interface Meeting {

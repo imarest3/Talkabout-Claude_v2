@@ -312,15 +312,15 @@ const WaitingRoomPage: React.FC = () => {
                                 </ListItem>
                             ) : (
                                 participants.map((participant, index) => (
-                                    <React.Fragment key={participant.id || index}>
+                                    <React.Fragment key={participant.user_code || index}>
                                         <ListItem>
                                             <ListItemAvatar>
                                                 <Avatar sx={{ bgcolor: 'secondary.main' }}>
-                                                    {participant.alias ? participant.alias[0].toUpperCase() : participant.user_code ? participant.user_code[0].toUpperCase() : 'U'}
+                                                    {participant.user_code ? participant.user_code[0].toUpperCase() : 'U'}
                                                 </Avatar>
                                             </ListItemAvatar>
                                             <ListItemText
-                                                primary={participant.alias || participant.user_code || 'Usuario Anónimo'}
+                                                primary={participant.user_code || 'Usuario Anónimo'}
                                             />
                                         </ListItem>
                                         {index < participants.length - 1 && <Divider variant="inset" component="li" />}

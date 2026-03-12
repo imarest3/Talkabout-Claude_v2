@@ -2,10 +2,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 interface Participant {
-    id: string; // Puede ser el user_id o el channel_name del WS
-    user_code?: string;
-    alias?: string;
-    is_ready?: boolean;
+    user_code: string;
+    joined_at: string;
+    status: 'waiting' | 'ready';
+    is_ready: boolean;
 }
 
 interface WaitingRoomState {

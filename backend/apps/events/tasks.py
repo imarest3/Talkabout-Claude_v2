@@ -17,8 +17,40 @@ from apps.meetings.services import distribute_participants, generate_jitsi_url
 from .emails import (
     send_first_reminder,
     send_second_reminder,
-    send_waiting_room_notification
+    send_waiting_room_notification,
+    send_enrollment_confirmation,
+    send_cancellation_confirmation
 )
+
+logger = logging.getLogger(__name__)
+
+@shared_task
+def send_enrollment_email_task(enrollment_id):
+    """
+    Celery task to send enrollment confirmation email asynchronously.
+    """
+    try:
+        enrollment = Enrollment.objects.get(id=enrollment_id)
+        if enrollment.user.email:
+            send_enrollment_confirmation(enrollment)
+            return f'Sent enrollment confirmation to {enrollment.user.email}'
+    except Enrollment.DoesNotExist:
+        logger.error(f'Enrollment {enrollment_id} not found for email task')
+        return f'Enrollment {enrollment_id} not found'
+
+@shared_task
+def send_cancellation_email_task(enrollment_id):
+    """
+    Celery task to send cancellation confirmation email asynchronously.
+    """
+    try:
+        enrollment = Enrollment.objects.get(id=enrollment_id)
+        if enrollment.user.email:
+            send_cancellation_confirmation(enrollment)
+            return f'Sent cancellation confirmation to {enrollment.user.email}'
+    except Enrollment.DoesNotExist:
+        logger.error(f'Enrollment {enrollment_id} not found for email task')
+        return f'Enrollment {enrollment_id} not found'
 
 logger = logging.getLogger(__name__)
 

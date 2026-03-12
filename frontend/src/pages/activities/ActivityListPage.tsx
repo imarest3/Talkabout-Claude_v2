@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Container, Typography, Box, TextField, InputAdornment,
     Grid, Card, CardContent, CardActions, Button, Chip,
@@ -22,17 +22,23 @@ interface ActivitiesResponse {
 
 const ActivityListPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const { user } = useAuth();
     const navigate = useNavigate();
 
     const isTeacherOrAdmin = user?.role === 'teacher' || user?.role === 'admin';
 
-    // debounce search could be implemented, but simple enough for now
+    // Update debounced search term after 400ms delay
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(searchTerm), 400);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
     const { data, isLoading, isError } = useQuery({
-        queryKey: ['activities', searchTerm],
+        queryKey: ['activities', debouncedSearch],
         queryFn: async () => {
             const response = await apiClient.get<ActivitiesResponse>('/activities/', {
-                params: { search: searchTerm || undefined }
+                params: { search: debouncedSearch || undefined }
             });
             return response.data;
         }

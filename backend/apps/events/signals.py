@@ -5,7 +5,7 @@ import logging
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from .models import Enrollment
-from .emails import send_enrollment_confirmation, send_cancellation_confirmation
+from .tasks import send_enrollment_email_task, send_cancellation_email_task
 
 logger = logging.getLogger(__name__)
 
@@ -29,13 +29,13 @@ def send_enrollment_emails(sender, instance, created, **kwargs):
     if created:
         # New enrollment - send confirmation
         logger.info(f'New enrollment created for user {instance.user.user_code} in event {instance.event.id}')
-        send_enrollment_confirmation(instance)
+        send_enrollment_email_task.delay(instance.id)
 
     else:
         # Existing enrollment updated - check if status changed to cancelled
         if instance.status == Enrollment.Status.CANCELLED:
             logger.info(f'Enrollment cancelled for user {instance.user.user_code} in event {instance.event.id}')
-            send_cancellation_confirmation(instance)
+            send_cancellation_email_task.delay(instance.id)
 
 
 @receiver(pre_save, sender=Enrollment)
