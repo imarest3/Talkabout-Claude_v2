@@ -142,8 +142,11 @@ Talkabout-Claude_v2/
 ├── docker-compose.yml
 ├── .env.example
 ├── .gitignore
-├── DATABASE_SCHEMA.md      # Documentación del esquema de BD
-└── README.md
+├── docs/
+│   ├── API_DOCUMENTATION.md
+│   ├── DATABASE_SCHEMA.md
+│   ├── ESTADO_PROYECTO.md
+│   └── POSTMAN_GUIDE.md
 ```
 
 ## Modelos de Base de Datos
@@ -178,7 +181,7 @@ Talkabout-Claude_v2/
 - Tracking de asistencia real
 - Estados: waiting → joined → left
 
-Ver `DATABASE_SCHEMA.md` para detalles completos.
+Ver `docs/DATABASE_SCHEMA.md` para detalles completos.
 
 ## Comandos Útiles
 
@@ -271,7 +274,7 @@ docker-compose exec frontend npm test
 
 ## Documentación de API
 
-La documentación completa de la API REST está disponible en [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md).
+La documentación completa de la API REST está disponible en [`docs/API_DOCUMENTATION.md`](./docs/API_DOCUMENTATION.md).
 
 ### Endpoints Disponibles
 
@@ -312,7 +315,7 @@ La documentación completa de la API REST está disponible en [`API_DOCUMENTATIO
 - `POST /api/events/convert-timezone/` - Convertir zonas horarias
 - `GET /api/events/<id>/statistics/` - Estadísticas del evento
 
-Ver [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) para ejemplos de uso, request/response formats, y códigos de error.
+Ver [`docs/API_DOCUMENTATION.md`](./docs/API_DOCUMENTATION.md) para ejemplos de uso, request/response formats, y códigos de error.
 
 ## Plan de Desarrollo Incremental
 
@@ -333,7 +336,7 @@ Ver [`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md) para ejemplos de uso, reque
 - Anonimización de usuarios (GDPR)
 - Sistema de permisos por roles (Admin, Profesor, Estudiante)
 - Tests de autenticación
-- Documentación completa de API (ver `API_DOCUMENTATION.md`)
+- Documentación completa de API (ver `docs/API_DOCUMENTATION.md`)
 
 ### ✅ Fase 3: CRUD de Actividades (COMPLETADA)
 - Serializers para Activity y ActivityFile
