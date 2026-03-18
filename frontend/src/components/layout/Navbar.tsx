@@ -55,6 +55,9 @@ const Navbar: React.FC = () => {
                                 <Button color="inherit" component={Link} to="/activities">
                                     Actividades
                                 </Button>
+                                <Button color="inherit" component={Link} to="/calendar">
+                                    Calendario
+                                </Button>
                                 <Button color="inherit" component={Link} to="/profile">
                                     Perfil
                                 </Button>
