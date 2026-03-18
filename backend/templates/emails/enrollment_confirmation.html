@@ -1,35 +1,45 @@
 {% extends "emails/base.html" %}
 
-{% block title %}Confirmación de inscripción - Talkabout{% endblock %}
+{% block title %}Confirmación de inscripción — Talkabout{% endblock %}
 
 {% block content %}
-<h2>¡Inscripción confirmada! ✅</h2>
+<h2>Inscripción confirmada</h2>
 
 <p>Hola <strong>{{ user.user_code }}</strong>,</p>
 
-<p>Te has inscrito exitosamente en la siguiente actividad de conversación:</p>
+<p>Tu inscripción ha sido registrada correctamente. A continuación encontrarás los detalles de la sesión:</p>
 
-<div class="event-details">
+<div class="event-card">
     <h3>{{ activity.title }}</h3>
-    <p><strong>📅 Fecha:</strong> {{ event.start_datetime|date:"d/m/Y" }}</p>
-    <p><strong>🕐 Hora:</strong> {{ event.start_datetime|time:"H:i" }} - {{ event.end_datetime|time:"H:i" }} (UTC)</p>
-    <p><strong>⏱️ Duración:</strong> {{ event.start_datetime|timesince:event.end_datetime }}</p>
+    <div class="detail-row">
+        <span class="detail-label">Fecha</span>
+        <span>{{ event.start_datetime|date:"d/m/Y" }}</span>
+    </div>
+    <div class="detail-row">
+        <span class="detail-label">Horario</span>
+        <span>{{ event.start_datetime|time:"H:i" }} – {{ event.end_datetime|time:"H:i" }} (UTC)</span>
+    </div>
+    <div class="detail-row">
+        <span class="detail-label">Sala de espera</span>
+        <span>Abre {{ event.waiting_time_minutes }} min antes del inicio</span>
+    </div>
     {% if activity.description %}
-    <p><strong>📝 Descripción:</strong></p>
-    <div>{{ activity.description|safe }}</div>
+    <div class="detail-row" style="margin-top: 12px;">
+        <span class="detail-label">Descripción</span>
+        <span>{{ activity.description|safe }}</span>
+    </div>
     {% endif %}
 </div>
 
-<p><strong>¿Qué sigue?</strong></p>
-<ul>
-    <li>📬 Recibirás recordatorios antes del evento</li>
-    <li>🚪 La sala de espera se abrirá {{ event.waiting_time_minutes }} minutos antes</li>
-    <li>👥 Serás asignado a un grupo automáticamente</li>
-</ul>
+<div class="info-block">
+    <p><strong>¿Qué ocurrirá a continuación?</strong></p>
+    <p>· Recibirás recordatorios por correo antes del evento.</p>
+    <p>· Cuando la sala de espera esté disponible, recibirás un enlace directo.</p>
+    <p>· Serás asignado automáticamente a un grupo al inicio de la sesión.</p>
+</div>
 
-<p>¡Te esperamos en la sesión!</p>
-
-<p style="margin-top: 30px;">
+<div class="signoff">
     <strong>Equipo Talkabout</strong>
-</p>
+    Universitat Politècnica de València
+</div>
 {% endblock %}

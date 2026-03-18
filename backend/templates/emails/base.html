@@ -1,99 +1,241 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Talkabout{% endblock %}</title>
+    <title>{% block title %}Talkabout — UPV{% endblock %}</title>
     <style>
+        * { box-sizing: border-box; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f4f4f4;
+            color: #1a1a1a;
+            background-color: #eef0f3;
             margin: 0;
-            padding: 0;
+            padding: 20px 0;
         }
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+        .wrapper {
+            max-width: 620px;
+            margin: 0 auto;
         }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        /* ── Top UPV bar ── */
+        .upv-bar {
+            background-color: #003d6e;
+            padding: 10px 24px;
+            border-radius: 6px 6px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .upv-bar .upv-brand {
             color: #ffffff;
-            padding: 30px 20px;
-            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
         }
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 600;
-        }
-        .content {
-            padding: 30px 20px;
-        }
-        .event-details {
-            background-color: #f8f9fa;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .event-details h3 {
-            margin-top: 0;
-            color: #667eea;
-        }
-        .event-details p {
-            margin: 8px 0;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: #667eea;
-            color: #ffffff !important;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 20px 0;
-            font-weight: 600;
-            text-align: center;
-        }
-        .btn:hover {
-            background-color: #5568d3;
-        }
-        .footer {
-            background-color: #f8f9fa;
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-            border-top: 1px solid #e9ecef;
-        }
-        .unsubscribe {
-            margin-top: 15px;
+
+        .upv-bar .upv-label {
+            color: #a8c4e0;
             font-size: 11px;
         }
-        .unsubscribe a {
-            color: #667eea;
-            text-decoration: none;
+
+        /* ── Header ── */
+        .header {
+            background-color: #0072bc;
+            padding: 28px 24px 24px;
+            text-align: center;
         }
+
+        .header .app-name {
+            color: #ffffff;
+            font-size: 26px;
+            font-weight: bold;
+            margin: 0 0 4px 0;
+            letter-spacing: 1px;
+        }
+
+        .header .app-subtitle {
+            color: #cce4f5;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        /* ── Content area ── */
+        .content {
+            background-color: #ffffff;
+            padding: 32px 28px;
+        }
+
+        .content h2 {
+            color: #003d6e;
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #e8eef4;
+            padding-bottom: 12px;
+        }
+
+        .content p {
+            margin: 10px 0;
+            color: #333333;
+        }
+
+        .content ul,
+        .content ol {
+            padding-left: 20px;
+            color: #333333;
+        }
+
+        .content li {
+            margin: 6px 0;
+        }
+
+        /* ── Event detail card ── */
+        .event-card {
+            background-color: #f4f8fc;
+            border-left: 4px solid #0072bc;
+            border-radius: 0 6px 6px 0;
+            padding: 18px 20px;
+            margin: 24px 0;
+        }
+
+        .event-card h3 {
+            margin: 0 0 12px 0;
+            color: #003d6e;
+            font-size: 16px;
+        }
+
+        .event-card .detail-row {
+            display: flex;
+            margin: 6px 0;
+            font-size: 14px;
+            color: #444444;
+        }
+
+        .event-card .detail-label {
+            font-weight: bold;
+            color: #003d6e;
+            min-width: 90px;
+            flex-shrink: 0;
+        }
+
+        /* ── CTA button ── */
+        .btn-wrapper {
+            text-align: center;
+            margin: 28px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 13px 36px;
+            background-color: #0072bc;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 0.3px;
+        }
+
+        /* ── Info / warning blocks ── */
+        .info-block {
+            background-color: #f0f7ff;
+            border: 1px solid #cce0f5;
+            border-radius: 4px;
+            padding: 14px 18px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .info-block.warning {
+            background-color: #fff8e6;
+            border-color: #f5d87a;
+        }
+
+        .info-block p {
+            margin: 6px 0;
+        }
+
+        /* ── Sign-off ── */
+        .signoff {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid #e8eef4;
+            font-size: 14px;
+            color: #555555;
+        }
+
+        .signoff strong {
+            color: #003d6e;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            background-color: #003d6e;
+            padding: 20px 24px;
+            text-align: center;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .footer p {
+            margin: 4px 0;
+            color: #a8c4e0;
+            font-size: 11px;
+        }
+
+        .footer .footer-title {
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .unsubscribe {
+            margin-top: 12px;
+        }
+
+        .unsubscribe a {
+            color: #7aabcc;
+            text-decoration: underline;
+            font-size: 11px;
+        }
+
         strong {
-            color: #667eea;
+            color: #003d6e;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🗣️ Talkabout</h1>
+    <div class="wrapper">
+        <!-- UPV institutional bar -->
+        <div class="upv-bar">
+            <span class="upv-brand">Universitat Politècnica de València</span>
+            <span class="upv-label">upv.es</span>
         </div>
+
+        <!-- App header -->
+        <div class="header">
+            <p class="app-name">Talkabout</p>
+            <p class="app-subtitle">Sistema de actividades de conversación</p>
+        </div>
+
+        <!-- Main content -->
         <div class="content">
             {% block content %}{% endblock %}
         </div>
+
+        <!-- Footer -->
         <div class="footer">
-            <p>© 2024 Talkabout - Sistema de gestión de actividades de conversación</p>
+            <p class="footer-title">Talkabout — Universitat Politècnica de València</p>
+            <p>© 2026 UPV · Este mensaje fue generado automáticamente, por favor no responda a este correo.</p>
             {% block unsubscribe %}
             {% if unsubscribe_url %}
             <div class="unsubscribe">
@@ -104,4 +246,5 @@
         </div>
     </div>
 </body>
+
 </html>

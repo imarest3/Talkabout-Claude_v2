@@ -1,42 +1,44 @@
 {% extends "emails/base.html" %}
 
-{% block title %}¡Sala de espera abierta! - {{ activity.title }}{% endblock %}
+{% block title %}Sala de espera abierta — {{ activity.title }}{% endblock %}
 
 {% block content %}
-<h2>🚪 ¡La sala de espera está abierta!</h2>
+<h2>La sala de espera está disponible</h2>
 
 <p>Hola <strong>{{ user.user_code }}</strong>,</p>
 
-<p>Tu sesión de conversación comienza muy pronto. ¡La sala de espera ya está disponible!</p>
+<p>Tu sesión comienza muy pronto. La sala de espera ya está abierta y puedes acceder ahora.</p>
 
-<div class="event-details">
+<div class="event-card">
     <h3>{{ activity.title }}</h3>
-    <p><strong>📅 Fecha:</strong> {{ event.start_datetime|date:"d/m/Y" }}</p>
-    <p><strong>🕐 Hora de inicio:</strong> {{ event.start_datetime|time:"H:i" }} (UTC)</p>
+    <div class="detail-row">
+        <span class="detail-label">Fecha</span>
+        <span>{{ event.start_datetime|date:"d/m/Y" }}</span>
+    </div>
+    <div class="detail-row">
+        <span class="detail-label">Inicio</span>
+        <span>{{ event.start_datetime|time:"H:i" }} (UTC)</span>
+    </div>
 </div>
 
-<p style="text-align: center;">
-    <a href="{{ waiting_room_url }}" class="btn">🚪 Entrar a la sala de espera</a>
-</p>
+<div class="btn-wrapper">
+    <a href="{{ waiting_room_url }}" class="btn">Entrar a la sala de espera</a>
+</div>
 
-<p><strong>Instrucciones:</strong></p>
-<ol>
-    <li>Haz clic en el botón de arriba para entrar</li>
-    <li>Espera en la sala hasta que comience el evento</li>
-    <li>Serás asignado automáticamente a un grupo</li>
-    <li>Se te redirigirá a la videoconferencia cuando esté lista</li>
-</ol>
+<div class="info-block warning">
+    <p><strong>Instrucciones:</strong></p>
+    <p>1. Haz clic en el botón para acceder a la sala de espera.</p>
+    <p>2. Permanece en la sala hasta que comience la sesión.</p>
+    <p>3. Serás asignado automáticamente a un grupo al inicio.</p>
+    <p>4. Se te redirigirá a la videoconferencia en el momento indicado.</p>
+</div>
 
-<p><strong>⚠️ Importante:</strong></p>
-<ul>
-    <li>Debes estar conectado en la sala de espera para participar</li>
-    <li>Si no entras a tiempo, no podrás unirte al grupo</li>
-    <li>Verifica tu cámara y micrófono antes de entrar</li>
-</ul>
+<div class="info-block">
+    <p><strong>Importante:</strong> debes estar conectado en la sala de espera para participar en la sesión. Si no accedes antes del inicio, es posible que no puedas unirte.</p>
+</div>
 
-<p>¡Nos vemos en la sesión!</p>
-
-<p style="margin-top: 30px;">
+<div class="signoff">
     <strong>Equipo Talkabout</strong>
-</p>
+    Universitat Politècnica de València
+</div>
 {% endblock %}
