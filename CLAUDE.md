@@ -62,7 +62,7 @@ Django project `talkabout` with four apps:
 | App | Responsibility |
 |-----|----------------|
 | `apps/users` | Custom User model (uuid PK, role, timezone), JWT auth, profile |
-| `apps/activities` | Activity + ActivityFile CRUD (teacher/admin only) |
+| `apps/activities` | Activity + ActivityFile CRUD (teacher/admin only), campo `max_participants` |
 | `apps/events` | Event lifecycle, Enrollment, email notifications |
 | `apps/meetings` | Jitsi Meeting + MeetingParticipant, participant distribution |
 
@@ -81,8 +81,10 @@ React 18 + TypeScript SPA:
 - `App.tsx` – Router with `PrivateRoute` protection
 - `context/AuthContext.tsx` – JWT state (localStorage), auto-refresh on 401
 - `services/api/client.ts` – Axios instance with token interceptors
-- `pages/` – Activities list/detail/form, Events create/detail/waiting-room, Profile
+- `pages/` – Activities list/detail/form, Events create/detail/waiting-room, Profile, Calendar
+- `pages/calendar/CalendarPage.tsx` – Vista de calendario con todos los eventos del usuario
 - `components/layout/MainLayout.tsx` – Shell wrapping all pages
+- `components/layout/Navbar.tsx` – Navegación principal (incluye enlace al calendario)
 - `types/index.ts` – Shared TypeScript interfaces for all domain entities
 
 State management uses **React Query** (v5) for server state; no Redux/Zustand.
@@ -115,6 +117,15 @@ FRONTEND_URL=http://localhost:3000
 ```
 
 Django `SECRET_KEY` is auto-generated in dev if not set.
+
+## Recent Changes (branch: version-mejorada)
+
+- **Activity.max_participants** – Nuevo campo en el modelo Activity con migración `0004_activity_max_participants.py`
+- **Serializers actualizados** – `activities` y `events` con soporte para los nuevos campos
+- **EventFormPage mejorado** – Más opciones de configuración y validaciones en el formulario de eventos
+- **CalendarPage** – Nueva página `frontend/src/pages/calendar/CalendarPage.tsx` con vista de calendario de eventos
+- **Navbar** – Enlace al calendario añadido en la navegación principal
+- **WaitingRoomPage / ActivityDetailPage / ActivityFormPage** – Ajustes y mejoras de UX
 
 ## Documentation
 
