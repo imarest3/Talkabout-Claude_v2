@@ -26,6 +26,7 @@ export interface Activity {
     title: string;
     description: string;
     max_participants_per_meeting: number;
+    max_participants: number | null;
     created_by: string;
     created_by_name?: string;
     is_active: boolean;

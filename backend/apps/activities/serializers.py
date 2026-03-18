@@ -36,6 +36,7 @@ class ActivitySerializer(serializers.ModelSerializer):
             'title',
             'description',
             'max_participants_per_meeting',
+            'max_participants',
             'created_by',
             'created_by_name',
             'is_active',
@@ -65,6 +66,7 @@ class ActivityCreateUpdateSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'max_participants_per_meeting',
+            'max_participants',
             'is_active'
         ]
 
@@ -87,6 +89,14 @@ class ActivityCreateUpdateSerializer(serializers.ModelSerializer):
         if value < 2:
             raise serializers.ValidationError(
                 "Maximum participants per meeting must be at least 2."
+            )
+        return value
+
+    def validate_max_participants(self, value):
+        """Validate total enrollment cap is at least 1 if set."""
+        if value is not None and value < 1:
+            raise serializers.ValidationError(
+                "Maximum participants must be at least 1."
             )
         return value
 

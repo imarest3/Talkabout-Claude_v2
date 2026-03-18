@@ -55,7 +55,7 @@ const WaitingRoomPage: React.FC = () => {
     } = useWaitingRoom(eventId);
 
     // 3. Cuando el backend ordene 'in_progress', buscar la Meeting URL
-    const { data: meetingData, isFetching: isMeetingFetching, error: fetchMeetingError } = useQuery({
+    const { data: meetingData, isFetching: isMeetingFetching } = useQuery({
         queryKey: ['my-meeting', eventId],
         queryFn: async () => {
             try {
@@ -77,6 +77,8 @@ const WaitingRoomPage: React.FC = () => {
     });
 
     // Contador regresivo
+    const [timeDistance, setTimeDistance] = useState<number>(0);
+
     useEffect(() => {
         if (!event || eventStatus === 'in_progress' || event.status === 'in_progress') {
             setTimeRemaining('');
@@ -90,14 +92,21 @@ const WaitingRoomPage: React.FC = () => {
 
             if (distance < 0) {
                 setTimeRemaining('Iniciando...');
+                setTimeDistance(0);
                 clearInterval(interval);
                 return;
             }
 
+            setTimeDistance(distance);
+
+            const days    = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours   = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            setTimeRemaining(`${minutes}m ${seconds}s`);
+            if (days > 0)       setTimeRemaining(`${days}d ${hours}h ${minutes}m`);
+            else if (hours > 0) setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
+            else                setTimeRemaining(`${minutes}m ${seconds}s`);
         }, 1000);
 
         return () => clearInterval(interval);
@@ -146,6 +155,7 @@ const WaitingRoomPage: React.FC = () => {
     const hasMeetingUrl = !!meetingData?.meeting_url;
 
     const localTimeStart = formatInTimeZone(new Date(event.start_datetime), userTimezone, "HH:mm");
+    const localDateFormatted = formatInTimeZone(new Date(event.start_datetime), userTimezone, "d 'de' MMMM yyyy");
 
     return (
         <Container maxWidth="md">
@@ -164,7 +174,7 @@ const WaitingRoomPage: React.FC = () => {
                         Sala de Espera
                     </Typography>
                     <Typography variant="subtitle1" color="text.secondary">
-                        {event.activity_title} - Hoy a las {localTimeStart}
+                        {event.activity_title} - {localDateFormatted} a las {localTimeStart}
                     </Typography>
                 </Box>
 
@@ -233,10 +243,14 @@ const WaitingRoomPage: React.FC = () => {
                         ) : !isReadyToJoin ? (
                             <>
                                 <Typography variant="h5" gutterBottom fontWeight="medium">
-                                    El evento está a punto de comenzar
+                                    {timeDistance > 60 * 60 * 1000
+                                        ? 'Estás en la sala de espera'
+                                        : 'El evento está a punto de comenzar'}
                                 </Typography>
                                 <Typography variant="body1" color="text.secondary" paragraph>
-                                    No cierres esta pestaña. Te redirigiremos automáticamente a tu grupo cuando todos estén listos.
+                                    {timeDistance > 60 * 60 * 1000
+                                        ? 'Asegúrate de estar conectado cuando empiece para que el sistema te asigne un grupo. No es necesario que permanezcas aquí hasta entonces.'
+                                        : 'No cierres esta pestaña. Te redirigiremos automáticamente a tu grupo cuando todos estén listos.'}
                                 </Typography>
 
                                 <Box sx={{ my: 4 }}>

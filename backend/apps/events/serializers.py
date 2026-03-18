@@ -129,6 +129,12 @@ class EventBulkCreateSerializer(serializers.Serializer):
     waiting_time_minutes = serializers.IntegerField(default=10)
     first_reminder_minutes = serializers.IntegerField(required=False, allow_null=True)
     second_reminder_minutes = serializers.IntegerField(required=False, allow_null=True)
+    weekdays = serializers.ListField(
+        child=serializers.IntegerField(min_value=0, max_value=6),
+        required=False,
+        allow_empty=False,
+        help_text="Days of week to include: 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun. Defaults to all days."
+    )
 
     def validate_activity_code(self, value):
         """Validate that activity exists."""
@@ -248,6 +254,16 @@ class EnrollmentCreateSerializer(serializers.Serializer):
         # Check if event is active
         if event.activity.is_active is False:
             raise serializers.ValidationError("Cannot enroll in inactive activity.")
+
+        # Check enrollment cap if set
+        max_participants = event.activity.max_participants
+        if max_participants is not None:
+            enrolled_count = Enrollment.objects.filter(
+                event=event,
+                status=Enrollment.Status.ENROLLED
+            ).count()
+            if enrolled_count >= max_participants:
+                raise serializers.ValidationError("This event is full.")
 
         return event
 

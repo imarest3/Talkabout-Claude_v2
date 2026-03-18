@@ -44,6 +44,10 @@ class Activity(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(help_text="HTML description of the activity")
     max_participants_per_meeting = models.PositiveIntegerField(default=6)
+    max_participants = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Maximum total enrollments per event. Leave blank for unlimited."
+    )
     created_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

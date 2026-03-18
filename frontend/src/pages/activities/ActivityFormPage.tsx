@@ -24,6 +24,7 @@ const ActivityFormPage: React.FC = () => {
         title: '',
         description: '',
         max_participants_per_meeting: 6,
+        max_participants: '' as number | '',
         is_active: true
     });
 
@@ -48,6 +49,7 @@ const ActivityFormPage: React.FC = () => {
                 title: activity.title,
                 description: activity.description,
                 max_participants_per_meeting: activity.max_participants_per_meeting,
+                max_participants: activity.max_participants ?? '',
                 is_active: activity.is_active
             });
         }
@@ -55,13 +57,16 @@ const ActivityFormPage: React.FC = () => {
 
     const mutation = useMutation({
         mutationFn: async (data: typeof form) => {
+            const payload = {
+                ...data,
+                max_participants: data.max_participants === '' ? null : data.max_participants
+            };
             if (isEditing) {
-                // Removemos 'code' del payload de actualización para no interferir con las validaciones del serializer en Django
-                const { code: _ignoredCode, ...patchData } = data;
+                const { code: _ignoredCode, ...patchData } = payload;
                 const response = await apiClient.patch(`/activities/${code}/update/`, patchData);
                 return response.data;
             } else {
-                const response = await apiClient.post('/activities/create/', data);
+                const response = await apiClient.post('/activities/create/', payload);
                 return response.data;
             }
         },
@@ -143,12 +148,23 @@ const ActivityFormPage: React.FC = () => {
                     <TextField
                         fullWidth
                         type="number"
-                        label="Máximo de Participantes por Evento"
+                        label="Máximo de participantes por sala (grupos)"
                         value={form.max_participants_per_meeting}
                         onChange={(e) => setForm({ ...form, max_participants_per_meeting: parseInt(e.target.value) || 2 })}
                         margin="normal"
                         required
                         inputProps={{ min: 2 }}
+                        helperText="Tamaño máximo de cada grupo de videollamada"
+                    />
+                    <TextField
+                        fullWidth
+                        type="number"
+                        label="Cupo máximo de inscritos por evento (opcional)"
+                        value={form.max_participants}
+                        onChange={(e) => setForm({ ...form, max_participants: e.target.value === '' ? '' : parseInt(e.target.value) })}
+                        margin="normal"
+                        inputProps={{ min: 1 }}
+                        helperText="Deja vacío para permitir inscripciones ilimitadas"
                     />
                     <Box sx={{ mt: 2 }}>
                         <FormControlLabel

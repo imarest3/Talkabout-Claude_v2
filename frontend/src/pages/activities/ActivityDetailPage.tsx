@@ -236,9 +236,27 @@ const ActivityDetailPage: React.FC = () => {
                             {localTimeStart} - {localTimeEnd}
                         </Typography>
 
+                        {!isPast && activity?.max_participants != null && (
+                            <Chip
+                                label={
+                                    (activity.max_participants - (event.enrolled_count ?? 0)) > 0
+                                        ? `${activity.max_participants - (event.enrolled_count ?? 0)} cupos disponibles`
+                                        : 'Sin cupos'
+                                }
+                                size="small"
+                                color={
+                                    (activity.max_participants - (event.enrolled_count ?? 0)) > 0
+                                        ? 'default'
+                                        : 'error'
+                                }
+                                variant="outlined"
+                                sx={{ mt: 0.5 }}
+                            />
+                        )}
+
                         {!isPast && (
                             <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                {isEnrolled && (event.status === 'in_waiting' || event.status === 'in_progress') && (
+                                {isEnrolled && (
                                     <Button
                                         variant="contained"
                                         color="success"

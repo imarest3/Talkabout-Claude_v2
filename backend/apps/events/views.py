@@ -123,12 +123,17 @@ def bulk_create_events(request):
     waiting_time_minutes = data['waiting_time_minutes']
     first_reminder_minutes = data.get('first_reminder_minutes')
     second_reminder_minutes = data.get('second_reminder_minutes')
+    # weekday() returns 0=Mon … 6=Sun — None means all days
+    allowed_weekdays = data.get('weekdays', None)
 
     # Generate event payloads and persist in bulk to keep DB writes consistent
     events_to_create = []
     current_date = start_date
 
     while current_date <= end_date:
+        if allowed_weekdays is not None and current_date.weekday() not in allowed_weekdays:
+            current_date += timedelta(days=1)
+            continue
         for hour_str in hours_utc:
             hour_time = datetime.strptime(hour_str, '%H:%M').time()
 
