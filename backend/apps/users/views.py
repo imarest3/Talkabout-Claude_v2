@@ -168,9 +168,83 @@ def anonymize_user_view(request):
             'error': 'User is already anonymized'
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    # Anonymize the user
     user.anonymize()
 
     return Response({
         'message': 'User data anonymized successfully. You have been logged out.'
     }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def unsubscribe_info_view(request, token):
+    """Return masked user info for the unsubscribe page (public, no auth)."""
+    try:
+        user = User.objects.get(unsubscribe_token=token)
+    except User.DoesNotExist:
+        return Response({'error': 'Token inválido o caducado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if user.is_anonymized:
+        return Response({'error': 'Esta cuenta ya ha sido dada de baja.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    email = user.email or ''
+    if email and '@' in email:
+        local, domain = email.split('@', 1)
+        masked = local[:2] + '***@' + domain
+    else:
+        masked = '(sin correo)'
+
+    return Response({
+        'email_masked': masked,
+        'email_notifications_enabled': user.email_notifications_enabled,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def unsubscribe_email_view(request, token):
+    """Disable email notifications by token (public, no auth)."""
+    try:
+        user = User.objects.get(unsubscribe_token=token)
+    except User.DoesNotExist:
+        return Response({'error': 'Token inválido o caducado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if user.is_anonymized:
+        return Response({'error': 'Esta cuenta ya ha sido dada de baja.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.email_notifications_enabled = False
+    user.save(update_fields=['email_notifications_enabled'])
+    return Response({'message': 'Has sido dado de baja del envío de correos correctamente.'})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reactivate_email_view(request, token):
+    """Re-enable email notifications by token (public, no auth)."""
+    try:
+        user = User.objects.get(unsubscribe_token=token)
+    except User.DoesNotExist:
+        return Response({'error': 'Token inválido o caducado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if user.is_anonymized:
+        return Response({'error': 'Esta cuenta ya ha sido dada de baja.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.email_notifications_enabled = True
+    user.save(update_fields=['email_notifications_enabled'])
+    return Response({'message': 'Notificaciones por correo reactivadas correctamente.'})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def anonymize_by_token_view(request, token):
+    """Permanently anonymize a user account by token (public, no auth)."""
+    try:
+        user = User.objects.get(unsubscribe_token=token)
+    except User.DoesNotExist:
+        return Response({'error': 'Token inválido o caducado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if user.is_anonymized:
+        return Response({'error': 'Esta cuenta ya ha sido dada de baja definitivamente.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.anonymize()
+    return Response({'message': 'Cuenta eliminada definitivamente. Tus datos han sido anonimizados.'})

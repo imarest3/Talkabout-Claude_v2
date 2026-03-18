@@ -1,9 +1,11 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Container } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Container, Tooltip, IconButton } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import upvLogo from '../../assets/upv-logo.png';
 import { useAuth } from '../../context/AuthContext';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
 
 const Navbar: React.FC = () => {
     const navigate = useNavigate();
@@ -62,7 +64,27 @@ const Navbar: React.FC = () => {
                                     Perfil
                                 </Button>
 
-                                <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mr: 1, gap: 1, color: 'text.secondary' }}>
+                                {user?.email_notifications_enabled === false && user?.unsubscribe_token && (
+                                    <Tooltip title="Notificaciones desactivadas — click para gestionar">
+                                        <IconButton
+                                            color="warning"
+                                            component={Link}
+                                            to={`/unsubscribe?token=${user.unsubscribe_token}`}
+                                            size="small"
+                                        >
+                                            <NotificationsOffIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
+                                {user?.email_notifications_enabled && (
+                                    <Tooltip title="Notificaciones activas">
+                                        <IconButton color="inherit" size="small" disableRipple sx={{ cursor: 'default' }}>
+                                            <NotificationsIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
+
+                                <Box sx={{ display: 'flex', alignItems: 'center', ml: 1, mr: 1, gap: 1, color: 'text.secondary' }}>
                                     <AccountCircleIcon />
                                     <Typography variant="body2" fontWeight="bold">
                                         {user?.user_code}

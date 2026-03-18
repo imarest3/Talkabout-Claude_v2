@@ -16,10 +16,12 @@ class UserSerializer(serializers.ModelSerializer):
             'timezone',
             'role',
             'is_active',
+            'email_notifications_enabled',
+            'unsubscribe_token',
             'created_at',
             'updated_at'
         ]
-        read_only_fields = ['id', 'user_code', 'role', 'is_active', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'user_code', 'role', 'is_active', 'unsubscribe_token', 'created_at', 'updated_at']
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

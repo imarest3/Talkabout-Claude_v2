@@ -5,6 +5,8 @@ export interface User {
     timezone: string;
     role: 'student' | 'teacher' | 'admin';
     is_active: boolean;
+    email_notifications_enabled: boolean;
+    unsubscribe_token: string;
     created_at?: string;
     updated_at?: string;
 }

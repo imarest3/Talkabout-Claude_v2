@@ -18,6 +18,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
+import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 
 import apiClient from '../../services/api/client';
 import { User } from '../../types';
@@ -160,6 +162,51 @@ const ProfilePage: React.FC = () => {
                             <Typography variant="body1" fontWeight="medium" textTransform="capitalize">
                                 {profile?.role || 'Estudiante'}
                             </Typography>
+                        </Box>
+
+                        <Box>
+                            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                                Notificaciones por correo
+                            </Typography>
+                            {profile?.email_notifications_enabled ? (
+                                <Alert
+                                    icon={<NotificationsActiveIcon fontSize="small" />}
+                                    severity="success"
+                                    action={
+                                        profile?.unsubscribe_token && (
+                                            <Button
+                                                size="small"
+                                                color="inherit"
+                                                href={`/unsubscribe?token=${profile.unsubscribe_token}`}
+                                            >
+                                                Desactivar
+                                            </Button>
+                                        )
+                                    }
+                                    sx={{ py: 0.5 }}
+                                >
+                                    Activas
+                                </Alert>
+                            ) : (
+                                <Alert
+                                    icon={<NotificationsOffIcon fontSize="small" />}
+                                    severity="warning"
+                                    action={
+                                        profile?.unsubscribe_token && (
+                                            <Button
+                                                size="small"
+                                                color="inherit"
+                                                href={`/unsubscribe?token=${profile.unsubscribe_token}`}
+                                            >
+                                                Reactivar
+                                            </Button>
+                                        )
+                                    }
+                                    sx={{ py: 0.5 }}
+                                >
+                                    Desactivadas
+                                </Alert>
+                            )}
                         </Box>
                     </Paper>
 

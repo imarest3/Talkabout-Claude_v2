@@ -209,6 +209,84 @@ def delete_activity_file(request, code, file_id):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated, IsTeacherOrAdmin])
+def activity_export_csv(request, code):
+    """
+    Export activity statistics as CSV.
+    Fields: activity name, activity code, event code, event datetime,
+            meeting code, enrolled count per meeting, real participants per meeting.
+    Only teachers and admins can export.
+    """
+    import csv
+    from django.http import HttpResponse
+    from apps.events.models import Enrollment
+    from apps.meetings.models import MeetingParticipant
+
+    activity = get_object_or_404(Activity, code=code)
+
+    # Permission check: teacher can only export their own activities
+    if request.user.role == 'teacher' and activity.created_by != request.user:
+        return Response({'error': "You don't have permission to export this activity."},
+                        status=status.HTTP_403_FORBIDDEN)
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="activity_{activity.code}.csv"'
+    response.write('\ufeff')  # BOM for Excel UTF-8 compatibility
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Nombre actividad',
+        'Código actividad',
+        'Código evento',
+        'Fecha y hora evento (UTC)',
+        'Código reunión',
+        'Inscritos a la reunión',
+        'Participantes reales',
+    ])
+
+    events = activity.events.prefetch_related('meetings__participants').order_by('start_datetime')
+
+    for event in events:
+        meetings = event.meetings.all()
+
+        if meetings.exists():
+            # Count total enrolled (not cancelled) for this event
+            total_enrolled = Enrollment.objects.filter(
+                event=event, status__in=['enrolled', 'attended', 'no_show']
+            ).count()
+
+            for meeting in meetings:
+                real_participants = meeting.participants.filter(
+                    status=MeetingParticipant.Status.JOINED
+                ).count()
+                writer.writerow([
+                    activity.title,
+                    activity.code,
+                    str(event.id),
+                    event.start_datetime.strftime('%Y-%m-%d %H:%M UTC'),
+                    meeting.meeting_id,
+                    total_enrolled,
+                    real_participants,
+                ])
+        else:
+            # Event with no meetings yet
+            enrolled_count = Enrollment.objects.filter(
+                event=event, status__in=['enrolled', 'attended', 'no_show']
+            ).count()
+            writer.writerow([
+                activity.title,
+                activity.code,
+                str(event.id),
+                event.start_datetime.strftime('%Y-%m-%d %H:%M UTC'),
+                '',
+                enrolled_count,
+                '',
+            ])
+
+    return response
+
+
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def activity_statistics(request, code):
     """

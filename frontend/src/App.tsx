@@ -8,6 +8,7 @@ import theme from './theme';
 import MainLayout from './components/layout/MainLayout';
 import { AuthProvider } from './context/AuthContext';
 import LoginPage from './pages/auth/LoginPage';
+import UnsubscribePage from './pages/auth/UnsubscribePage';
 import ActivityListPage from './pages/activities/ActivityListPage';
 import ActivityDetailPage from './pages/activities/ActivityDetailPage';
 import ActivityFormPage from './pages/activities/ActivityFormPage';
@@ -52,6 +53,7 @@ function App() {
                 {/* Rutas Públicas */}
                 <Route path="login" element={<LoginPage />} />
                 <Route path="register" element={<Placeholder title="Registro de Usuario" />} />
+                <Route path="unsubscribe" element={<UnsubscribePage />} />
 
                 {/* Rutas Privadas */}
                 <Route element={<PrivateRoute />}>

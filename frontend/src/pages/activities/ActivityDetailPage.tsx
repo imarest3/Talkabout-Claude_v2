@@ -15,6 +15,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DownloadIcon from '@mui/icons-material/Download';
 import apiClient from '../../services/api/client';
 import { Activity, Event } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -40,6 +41,28 @@ const ActivityDetailPage: React.FC = () => {
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [fileToDelete, setFileToDelete] = useState<{ id: string, filename: string } | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [isExportingCsv, setIsExportingCsv] = useState(false);
+
+    const handleExportCsv = async () => {
+        setIsExportingCsv(true);
+        try {
+            const response = await apiClient.get(`/activities/${activityCode}/export-csv/`, {
+                responseType: 'blob',
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `actividad_${activityCode}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch {
+            setErrorMsg('No se pudo descargar el CSV. Inténtalo de nuevo.');
+        } finally {
+            setIsExportingCsv(false);
+        }
+    };
 
     const isTeacherOrAdmin = user?.role === 'teacher' || user?.role === 'admin';
 
@@ -345,6 +368,16 @@ const ActivityDetailPage: React.FC = () => {
                                     onClick={() => setOpenDeleteDialog(true)}
                                 >
                                     Eliminar
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    color="success"
+                                    startIcon={<DownloadIcon />}
+                                    size="small"
+                                    onClick={handleExportCsv}
+                                    disabled={isExportingCsv}
+                                >
+                                    {isExportingCsv ? 'Exportando...' : 'Exportar CSV'}
                                 </Button>
                             </Box>
                         )}

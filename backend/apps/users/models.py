@@ -1,4 +1,5 @@
 import uuid
+import secrets
 import pytz
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.exceptions import ValidationError
@@ -37,6 +38,9 @@ class UserManager(BaseUserManager):
         return self.create_user(user_code, email, password, **extra_fields)
 
 
+def generate_unsubscribe_token():
+    return secrets.token_urlsafe(32)
+
 class User(AbstractBaseUser, PermissionsMixin):
     """Custom user model for Talkabout application."""
 
@@ -57,6 +61,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_anonymized = models.BooleanField(default=False)
+    email_notifications_enabled = models.BooleanField(default=True)
+    unsubscribe_token = models.CharField(
+        max_length=64,
+        unique=True,
+        db_index=True,
+        default=generate_unsubscribe_token
+    )
     created_at = models.DateTimeField(default=timezone_now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -100,5 +111,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.user_code = f"anonymous_{self.id}"
         self.is_anonymized = True
         self.is_active = False
+        self.email_notifications_enabled = False
+        self.unsubscribe_token = secrets.token_urlsafe(32)  # Invalidate old token
         # Skip validation when anonymizing
         super(User, self).save()
