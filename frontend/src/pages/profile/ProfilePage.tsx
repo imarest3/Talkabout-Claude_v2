@@ -11,7 +11,8 @@ import {
     Divider,
     Alert,
     Snackbar,
-    Autocomplete
+    Autocomplete,
+    Chip
 } from '@mui/material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import SaveIcon from '@mui/icons-material/Save';
@@ -21,6 +22,7 @@ import MyLocationIcon from '@mui/icons-material/MyLocation';
 import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 
+import { Link } from 'react-router-dom';
 import apiClient from '../../services/api/client';
 import { User } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -82,7 +84,7 @@ const ProfilePage: React.FC = () => {
             const response = await apiClient.patch('/users/profile/update/', data);
             return response.data;
         },
-        onSuccess: (data, variables) => {
+        onSuccess: (_data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['profile'] });
             updateUser({ email: variables.email, timezone: variables.timezone });
             setSnackbar({ open: true, message: 'Perfil actualizado correctamente', severity: 'success' });
@@ -164,48 +166,36 @@ const ProfilePage: React.FC = () => {
                             </Typography>
                         </Box>
 
-                        <Box>
-                            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                Notificaciones por correo
-                            </Typography>
-                            {profile?.email_notifications_enabled ? (
-                                <Alert
-                                    icon={<NotificationsActiveIcon fontSize="small" />}
-                                    severity="success"
-                                    action={
-                                        profile?.unsubscribe_token && (
-                                            <Button
-                                                size="small"
-                                                color="inherit"
-                                                href={`/unsubscribe?token=${profile.unsubscribe_token}`}
-                                            >
-                                                Desactivar
-                                            </Button>
-                                        )
-                                    }
-                                    sx={{ py: 0.5 }}
+                    </Paper>
+
+                    <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+                        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {profile?.email_notifications_enabled
+                                ? <NotificationsActiveIcon color="success" />
+                                : <NotificationsOffIcon color="warning" />}
+                            Gestión de suscripción
+                        </Typography>
+                        <Divider sx={{ mb: 2 }} />
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                            Controla si recibes correos de recordatorio y avisos de eventos. También puedes eliminar tu cuenta de forma permanente desde esta sección.
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Chip
+                                icon={profile?.email_notifications_enabled ? <NotificationsActiveIcon /> : <NotificationsOffIcon />}
+                                label={profile?.email_notifications_enabled ? 'Notificaciones activas' : 'Notificaciones desactivadas'}
+                                color={profile?.email_notifications_enabled ? 'success' : 'warning'}
+                                variant="outlined"
+                            />
+                            {profile?.unsubscribe_token && (
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    color="primary"
+                                    component={Link}
+                                    to={`/unsubscribe?token=${profile.unsubscribe_token}`}
                                 >
-                                    Activas
-                                </Alert>
-                            ) : (
-                                <Alert
-                                    icon={<NotificationsOffIcon fontSize="small" />}
-                                    severity="warning"
-                                    action={
-                                        profile?.unsubscribe_token && (
-                                            <Button
-                                                size="small"
-                                                color="inherit"
-                                                href={`/unsubscribe?token=${profile.unsubscribe_token}`}
-                                            >
-                                                Reactivar
-                                            </Button>
-                                        )
-                                    }
-                                    sx={{ py: 0.5 }}
-                                >
-                                    Desactivadas
-                                </Alert>
+                                    Gestionar suscripción y cuenta
+                                </Button>
                             )}
                         </Box>
                     </Paper>

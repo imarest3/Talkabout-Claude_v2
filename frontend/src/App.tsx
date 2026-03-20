@@ -12,6 +12,7 @@ import UnsubscribePage from './pages/auth/UnsubscribePage';
 import ActivityListPage from './pages/activities/ActivityListPage';
 import ActivityDetailPage from './pages/activities/ActivityDetailPage';
 import ActivityFormPage from './pages/activities/ActivityFormPage';
+import ActivityStatsPage from './pages/activities/ActivityStatsPage';
 import WaitingRoomPage from './pages/events/WaitingRoomPage';
 import EventFormPage from './pages/events/EventFormPage';
 import ProfilePage from './pages/profile/ProfilePage';
@@ -62,6 +63,7 @@ function App() {
                   <Route path="activities/create" element={<ActivityFormPage />} />
                   <Route path="activities/:code/edit" element={<ActivityFormPage />} />
                   <Route path="activities/:id" element={<ActivityDetailPage />} />
+                  <Route path="activities/:code/statistics" element={<ActivityStatsPage />} />
                   <Route path="activities/:code/events/create" element={<EventFormPage />} />
                   <Route path="events/:eventId/waiting-room" element={<WaitingRoomPage />} />
                   <Route path="calendar" element={<CalendarPage />} />

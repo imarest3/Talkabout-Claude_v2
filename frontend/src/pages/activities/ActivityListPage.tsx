@@ -28,9 +28,9 @@ const ActivityListPage: React.FC = () => {
 
     const isTeacherOrAdmin = user?.role === 'teacher' || user?.role === 'admin';
 
-    // Update debounced search term after 400ms delay
+    // Update debounced search term after 300ms delay
     useEffect(() => {
-        const timer = setTimeout(() => setDebouncedSearch(searchTerm), 400);
+        const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300);
         return () => clearTimeout(timer);
     }, [searchTerm]);
 

@@ -9,6 +9,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatInTimeZone } from 'date-fns-tz';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import EditIcon from '@mui/icons-material/Edit';
@@ -368,6 +369,15 @@ const ActivityDetailPage: React.FC = () => {
                                     onClick={() => setOpenDeleteDialog(true)}
                                 >
                                     Eliminar
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    color="info"
+                                    startIcon={<BarChartIcon />}
+                                    size="small"
+                                    onClick={() => navigate(`/activities/${activityCode}/statistics`)}
+                                >
+                                    Estadísticas
                                 </Button>
                                 <Button
                                     variant="outlined"
