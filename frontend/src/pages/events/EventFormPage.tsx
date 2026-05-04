@@ -13,13 +13,13 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { es } from 'date-fns/locale';
 import { format, eachDayOfInterval, isAfter } from 'date-fns';
-import { zonedTimeToUtc } from 'date-fns-tz';
+import { fromZonedTime } from 'date-fns-tz';
 
 import apiClient from '../../services/api/client';
 import { useAuth } from '../../context/AuthContext';
@@ -133,7 +133,7 @@ const EventFormPage: React.FC = () => {
                     today.getFullYear(), today.getMonth(), today.getDate(),
                     t.getHours(), t.getMinutes(), 0
                 );
-                const utcDate = zonedTimeToUtc(zonedDate, userTimezone);
+                const utcDate = fromZonedTime(zonedDate, userTimezone);
                 return format(utcDate, 'HH:mm');
             });
             const payload: Record<string, any> = {
